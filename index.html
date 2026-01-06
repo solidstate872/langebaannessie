@@ -1,283 +1,490 @@
+<!-- Build 0.1.4d — Boss pass — 2026-01-06 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Langebaan Nessie</title>
-
 <style>
-html, body {
-    margin: 0;
-    width: 100%;
-    height: 100%;
-    background: #000;
-    overflow: hidden;
-    font-family: 'Segoe UI', sans-serif;
-    color: white;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    transition: background-color 0.6s ease, color 0.6s ease;
-}
+/* --- BASE --- */
+html,body{margin:0;padding:0;width:100%;height:100%;font-family:'Segoe UI',sans-serif;display:flex;justify-content:center;align-items:center;overflow:hidden;text-align:center;transition:background-color .5s,color .5s}
+body{background:#fefefe;color:#222}
 
-/* Landing page text */
-.welcome {
-    font-size: clamp(1rem, 4vh, 2rem);
-    margin-bottom: 10vh;
-    max-height: 40%;
-    z-index: 3;
-    line-height: 1.2;
-}
+/* --- LANDING TEXT --- */
+.welcome{font-size:clamp(1rem,4vh,2rem);margin-bottom:10vh;z-index:3;cursor:pointer;transition:none} /* snap: removed fade */
 
-.welcome sup {
-    font-size: 0.6em;
-    vertical-align: super;
-}
+/* --- FULL WIDTH BAR --- */
+.bar{position:absolute;top:50%;left:0;width:100%;height:14px;background:#222;cursor:pointer;border-radius:8px;z-index:3;transition:.3s}
 
-.note {
-    font-size: clamp(0.8rem, 2.5vh, 1.1rem);
-    margin-top: 2vh;
-    color: #cccccc;
-    z-index: 3;
-}
+/* --- HOVER EFFECT FOR BACKGROUND/HEADING ONLY --- */
+body.bar-hovered{background:#222;color:#fefefe}
 
-/* White landing bar */
-.bar {
-    position: absolute;
-    top: 50%;
-    left: 0;
-    width: 100%;
-    height: 14px;
-    background-color: white;
-    transform: translateY(-50%);
-    cursor: pointer;
-    z-index: 3;
-    transition: background-color 0.3s ease;
-}
+/* --- PLAY BUTTON --- */
+#playButton{position:absolute;top:calc(50% + 30px);left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#26A6FF,#1e6bbf);color:#fff;font-weight:700;font-size:1.25rem;padding:16px 48px;border:0;border-radius:12px;cursor:pointer;z-index:3;box-shadow:0 6px 20px rgba(0,0,0,.3);transition:.3s}
+#playButton:hover{transform:translateX(-50%) scale(1.05);box-shadow:0 8px 28px rgba(0,0,0,.4)}
 
-/* Invert */
-.invert-background {
-    background-color: #ffffff !important;
-    color: #000000 !important;
-}
-.invert-background .bar {
-    background-color: #000000 !important;
-}
+/* --- VIDEO --- */
+#videoContainer{position:absolute;top:0;left:0;width:100%;height:100%;display:none}
+#videoPlayer{width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;z-index:1;transition:filter .3s,opacity .5s}
+.grid-overlay{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;background-image:linear-gradient(to right,rgba(0,0,0,.15) 1px,transparent 1px),linear-gradient(to bottom,rgba(0,0,0,.15) 1px,transparent 1px);background-size:5px 5px;z-index:2}
+#videoBuffered,#videoProgress{position:absolute;bottom:0;left:0;height:4px;transition:width .25s linear;z-index:5}
+#videoBuffered{background:#ccc;z-index:4}
+#videoProgress{background:#26A6FF}
 
-/* QR styling */
-.qr-box {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    width: 100px;
-    height: 100px;
-    background-color: #ffffff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border: 2px solid rgba(0,0,0,0.2);
-    border-radius: 8px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.5);
-    z-index: 3;
-    cursor: pointer;
-}
-.qr-box canvas {
-    width: 92px !important;
-    height: 92px !important;
-}
+/* --- QR BOX --- */
+.qr-box{position:fixed;bottom:20px;right:20px;width:110px;height:110px;background:#fff;display:flex;justify-content:center;align-items:center;border-radius:14px;box-shadow:0 6px 24px rgba(0,0,0,.5);cursor:pointer;font-weight:700;font-size:.85rem;color:#000;z-index:12;transition:.2s}
+.qr-box.disabled{pointer-events:none;opacity:.4}
+.qr-box:hover:not(.disabled){transform:scale(1.05);box-shadow:0 8px 28px rgba(0,0,0,.6)}
 
-/* Video */
-#videoContainer {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    display: none;
-}
+/* --- INFO PANEL --- */
+/* blur applies only when body.info-open AND NOT body.hide-ui */
+body.info-open:not(.hide-ui) #videoPlayer{filter:blur(6px) brightness(.7)}
+#infoOverlayLarge{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:90%;max-width:640px;height:80%;background:#fff;color:#222;display:none;flex-direction:column;z-index:20;border-radius:16px;padding:24px;box-sizing:border-box;overflow:hidden;text-align:justify;justify-content:flex-start;box-shadow:0 12px 30px rgba(0,0,0,.2);transition:background-color .5s,color .5s,backdrop-filter .3s,opacity .3s}
+body.info-open{overflow:hidden}
+#closeInfoOverlay{position:absolute;top:12px;right:12px;width:28px;height:28px;background:#ccc;border:0;border-radius:6px;display:flex;justify-content:center;align-items:center;cursor:pointer;z-index:21;transition:.2s}
+#closeInfoOverlay::before,#closeInfoOverlay::after{content:'';position:absolute;width:2px;height:16px;background:#222}
+#closeInfoOverlay::before{transform:rotate(45deg)}
+#closeInfoOverlay::after{transform:rotate(-45deg)}
+#closeInfoOverlay:hover{background:#26A6FF}
+#closeInfoOverlay:hover::before,#closeInfoOverlay:hover::after{background:#fff}
 
-#videoPlayer {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    object-fit: cover;
-    z-index: 1;
-}
+/* --- INFO TABS --- */
+#infoTabs{display:flex;justify-content:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+#infoTabs button{padding:6px 12px;border-radius:10px;border:0;background:rgba(38,166,255,.5);font-weight:700;cursor:pointer;transition:.2s;font-size:.85rem;color:#fff}
+#infoTabs button.active{background:#26A6FF}
+.tabContent{display:none;flex:1;overflow-y:auto;padding:8px 0;scrollbar-width:thin;scrollbar-color:#26A6FF #ccc}
+.tabContent::-webkit-scrollbar{width:6px}
+.tabContent::-webkit-scrollbar-track{background:#ccc;border-radius:3px}
+.tabContent::-webkit-scrollbar-thumb{background:#26A6FF;border-radius:3px}
 
-.grid-overlay {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    pointer-events: none;
-    background-image:
-        linear-gradient(to right, rgba(0,0,0,0.3) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(0,0,0,0.3) 1px, transparent 1px);
-    background-size: 5px 5px;
-    z-index: 2;
-}
+/* --- SETTINGS TOP RIGHT --- */
+#settingsWrapper{position:fixed;top:12px;right:12px;z-index:25;display:flex;flex-direction:column;align-items:flex-end}
+#settingsBtn{font-size:.95rem;cursor:pointer;color:#fff;margin-bottom:6px;background:#26A6FF;border:0;border-radius:8px;padding:6px 12px;transition:.25s}
+#settingsBtn:hover{background:#1e6bbf;transform:scale(1.05)}
+#settingsPanel{display:none;flex-direction:column;background:#f0f0f0;color:#222;border-radius:14px;padding:14px 20px;box-shadow:0 6px 18px rgba(0,0,0,.2);font-size:.9rem;gap:12px;min-width:170px}
+.settingItem{display:flex;justify-content:space-between;align-items:center}
+#volumeControl{width:80px}
 
-#fullscreenBtn {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 40px;
-    height: 40px;
-    background-color: rgba(255,255,255,0.2);
-    border: 2px solid white;
-    border-radius: 8px;
-    cursor: pointer;
-    z-index: 4;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 20px;
-    color: white;
-    font-weight: bold;
-    transition: background-color 0.3s ease, opacity 0.5s ease;
-}
+/* --- SWITCH --- */
+.switch{position:relative;display:inline-block;width:50px;height:26px}
+.switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.15);border-radius:34px;transition:.4s}
+.slider:before{position:absolute;content:"";height:20px;width:20px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.4s}
+input:checked + .slider{background:rgba(38,166,255,.8)}
+input:checked + .slider:before{transform:translateX(24px)}
 
-#infoOverlay {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background-color: rgba(0,0,0,0.85);
-    color: white;
-    display: none;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    padding: 20px;
-    z-index: 10;
-    flex-direction: column;
-}
+/* --- DARK MODE --- */
+body.dark-mode{background:#000;color:#fff}
+body.dark-mode .bar{background:#fff}
+body.dark-mode #videoBuffered{background:#fff}
+body.dark-mode #videoProgress{background:#26A6FF}
+body.dark-mode .qr-box{background:#222;color:#fff}
+body.dark-mode #infoOverlayLarge{background:#222;color:#fff}
+body.dark-mode #settingsPanel{background:#333;color:#fff}
+body.dark-mode #settingsBtn{background:#26A6FF;color:#fff}
 
-#infoOverlay p {
-    margin: 5px 0;
-    font-size: 1.2rem;
-}
+/* --- QR MODAL + OVERLAY --- */
+#qrModalOverlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.25);backdrop-filter:blur(3px);z-index:29;opacity:0;transition:opacity .18s ease}
+#qrModal{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.98);background:#fff;color:#222;padding:18px 22px;border-radius:14px;box-shadow:0 12px 36px rgba(0,0,0,.35);z-index:30;text-align:center;width:300px;font-family:'Segoe UI',sans-serif;opacity:0;transition:opacity .18s ease,transform .18s ease}
+#qrModal.open{display:block;opacity:1;transform:translate(-50%,-50%) scale(1)}
+#qrModalOverlay.open{display:block;opacity:1}
 
-#infoOverlay .closeBtn {
-    margin-top: 20px;
-    padding: 8px 16px;
-    background-color: white;
-    color: black;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-}
+/* --- Tiny modal buttons --- */
+.modalBtn{padding:8px 14px;border:0;border-radius:10px;font-weight:700;cursor:pointer}
+.modalProceed{background:#26A6FF;color:#fff}
+.modalCancel{background:#ddd;color:#222}
 
-/* Build tag */
-#buildTag {
-    position: fixed;
-    bottom: 10px;
-    left: 10px;
-    font-size: 0.6rem;
-    color: rgba(255,255,255,0.35);
-    z-index: 20;
-    pointer-events: none;
-}
+/* --- NOTE / FOOTER --- */
+#buildNo{position:fixed;bottom:12px;left:12px;font-size:.85rem;color:#555;z-index:3}
+#copyright{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);font-size:.85rem;color:#555;z-index:3}
+
+/* --- MAP --- */
+.mapWrapper{width:100%;height:250px;margin-top:12px;border-radius:12px;overflow:hidden}
+.mapWrapper iframe{width:100%;height:100%;border:0;transition:filter .3s}
+body.dark-mode .mapWrapper iframe{filter:invert(1) hue-rotate(180deg)}
+
+/* --- SMALL TEXT FOR BOOKINGS --- */
+.bookingsNote{font-size:.8rem;color:#555;margin-top:8px}
 </style>
 </head>
-
 <body>
 
-<div id="buildTag">build 0.2.a</div>
-
+<!-- LANDING TEXT -->
 <div class="welcome">
-    Welcome to <span style="color:#26A69A; white-space: nowrap;">theVideopage<sup>TM</sup></span> of “Langebaan Nessie”
+    Welcome to <span style="color:#26A6FF;">theVideopage<sup>TM</sup></span> of “Langebaan Nessie”
 </div>
+
+<!-- START BAR -->
 <div class="bar" id="startBar"></div>
-<div class="note">Start the experience.</div>
 
-<div id="qrTip" class="qr-box"></div>
+<!-- PLAY BUTTON -->
+<button id="playButton">Play</button>
 
-<div id="infoOverlay">
-    <p>theVideopage™ is designed by Kobus Liebenberg</p>
-    <p>Cell: +27 66 121 8440</p>
-    <p>Email: kobus.email@gmail.com</p>
-    <button class="closeBtn">Close</button>
-</div>
+<!-- QR TIP (landing) -->
+<div id="qrTip" class="qr-box" title="Scan / Click to open site"></div>
 
+<!-- VIDEO -->
 <div id="videoContainer">
-    <video id="videoPlayer" loop playsinline preload="auto">
+    <video id="videoPlayer" loop playsinline preload="metadata" poster="poster.jpg" tabindex="0">
         <source src="langebaannessie.mp4" type="video/mp4">
     </video>
-    <div class="grid-overlay" id="grid"></div>
-    <div id="qrBtn" class="qr-box"></div>
-    <div id="fullscreenBtn">⛶</div>
+    <div class="grid-overlay"></div>
+    <div id="videoBuffered"></div>
+    <div id="videoProgress"></div>
+    <div id="qrBtn" class="qr-box disabled" title="Open info">Info</div>
 </div>
 
+<!-- INFO PANEL -->
+<div id="infoOverlayLarge">
+    <button id="closeInfoOverlay" aria-label="Close info"></button>
+    <div id="infoTabs">
+        <button class="tabBtn active" data-tab="about">About Us</button>
+        <button class="tabBtn" data-tab="bookings">Bookings</button>
+        <button class="tabBtn" data-tab="contact">Contact Us</button>
+    </div>
+    <div id="infoContent">
+        <div class="tabContent" id="about" style="display:block">
+            <h2>About Langebaan Nessie</h2>
+            <p><strong>South Africa, Western Cape, Langebaan, 3 Jutten, 7357</strong></p>
+            <p>
+                "By Langebaan Nessie nooi ons jou om stadiger te leef en die oomblik te geniet. Langebaan Nessie is 'n self catering woonstel binne loopafstand van die see, winkeltjies, koffiewinkels en Spar. Dit is die ideale plek vir gaste wat 'n rustige gemaklike verblyf in die hart van Langebaan soek."
+            </p>
+            <p>
+                "At Langebaan Nessie, we invite you to slow down and enjoy the moment. Langebaan Nessie is a self-catering apartment within walking distance of the sea, shops, coffee cafés, and Spar. It is the ideal place for guests seeking a peaceful, comfortable stay in the heart of Langebaan."
+            </p>
+            <div class="mapWrapper">
+                <iframe 
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3342.827890596172!2d18.033365576403195!3d-33.08731227353564!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1c34aa1d531732c7%3A0xca65cb64ada8f411!2s3%20Jutten%20St%2C%20Langebaan%2C%207357!5e0!3m2!1sen!2sza!4v1767691309825!5m2!1sen!2sza" 
+                    width="400" height="300" style="border:0" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+            </div>
+        </div>
+        <div class="tabContent" id="bookings">
+            <h2>Bookings & Pricing</h2>
+            <p>Contact us directly for bookings.</p>
+            <p>1 Guest, 1 Night — ZAR 889<br>1 Couple, 1 Night (Double Bed) — ZAR 1,369<br>4 Guests, 1 Night (Double Bed & Two Single Beds) — ZAR 1,599</p>
+            <p>Phone: +27 66 469 7838<br>Email: info@langebaannessie.co.za</p>
+            <p class="bookingsNote">(A 60% deposit is payable upfront to secure your booking. Cancellations made less than 3 days before the booking are non-refundable. Check-in: From 14:00 (2:00 PM). Check-out: By 10:00 (10:00 AM) the following day)</p>
+        </div>
+        <div class="tabContent" id="contact">
+            <h2>Contact Us</h2>
+            <p>Phone: +27 66 469 7838<br>Email: info@langebaannessie.co.za<br>Operating during standard hours. Excluding Sundays and public holidays.</p>
+        </div>
+    </div>
+</div>
+
+<!-- QR Modal overlay + popup -->
+<div id="qrModalOverlay" aria-hidden="true"></div>
+<div id="qrModal" role="dialog" aria-modal="true" aria-labelledby="qrModalTitle" aria-describedby="qrModalDesc">
+    <p id="qrModalDesc" style="margin:0 0 14px;font-size:.95rem;color:#222">
+        You clicked the QR code!<br>
+        Would you like to visit our main business site?
+    </p>
+    <div style="display:flex;justify-content:center;gap:12px">
+        <button id="qrProceedBtn" class="modalBtn modalProceed" type="button">Proceed</button>
+        <button id="qrCancelBtn" class="modalBtn modalCancel" type="button">Cancel</button>
+    </div>
+</div>
+
+<!-- SETTINGS -->
+<div id="settingsWrapper">
+    <button id="settingsBtn">Settings</button>
+    <div id="settingsPanel">
+        <div class="settingItem">
+            <label>Visual Mode</label>
+            <label class="switch">
+                <input type="checkbox" id="visualModeToggle"><span class="slider"></span>
+            </label>
+        </div>
+        <div class="settingItem">
+            <label>Fullscreen</label>
+            <label class="switch">
+                <input type="checkbox" id="fullscreenModeToggle"><span class="slider"></span>
+            </label>
+        </div>
+        <div class="settingItem">
+            <label>Pause Video</label>
+            <label class="switch">
+                <input type="checkbox" id="pauseVideoToggle"><span class="slider"></span>
+            </label>
+        </div>
+        <div class="settingItem">
+            <label>Mute Audio</label>
+            <label class="switch">
+                <input type="checkbox" id="muteAudioToggle"><span class="slider"></span>
+            </label>
+        </div>
+        <div class="settingItem">
+            <label>Volume</label>
+            <input id="volumeControl" type="range" min="0" max="1" step="0.01" value="0.5">
+        </div>
+        <div class="settingItem">
+            <label>Hide UI</label>
+            <label class="switch">
+                <input type="checkbox" id="hideUIToggle"><span class="slider"></span>
+            </label>
+        </div>
+        <div class="settingItem">
+            <label>Reset Landing</label>
+            <label class="switch">
+                <input type="checkbox" id="refreshPageToggle"><span class="slider"></span>
+            </label>
+        </div>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<div id="buildNo">Build No. 0.1.4d</div>
+<div id="copyright">© 2026 · All rights reserved</div>
+
+<!-- QR library -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
-const url = "https://solidstate872.github.io/comingsoon/";
+// --- QR CODE (landing) ---
+new QRCode(document.getElementById("qrTip"), { text: "https://solidstate872.github.io/comingsoon/", width:85, height:85 });
 
-new QRCode(document.getElementById("qrTip"), { text: url, width: 85, height: 85 });
-new QRCode(document.getElementById("qrBtn"), { text: url, width: 85, height: 85 });
-
+// ELEMENTS
 const startBar = document.getElementById('startBar');
-const qrTip = document.getElementById('qrTip');
 const videoContainer = document.getElementById('videoContainer');
 const video = document.getElementById('videoPlayer');
-const grid = document.getElementById('grid');
+const videoProgress = document.getElementById('videoProgress');
+const videoBuffered = document.getElementById('videoBuffered');
 const qrBtn = document.getElementById('qrBtn');
-const fullscreenBtn = document.getElementById('fullscreenBtn');
-const infoOverlay = document.getElementById('infoOverlay');
-const closeBtn = document.querySelector('.closeBtn');
+const qrTip = document.getElementById('qrTip');
+const infoOverlayLarge = document.getElementById('infoOverlayLarge');
+const closeInfoOverlay = document.getElementById('closeInfoOverlay');
+const infoTabs = document.querySelectorAll('.tabBtn');
+const tabContents = document.querySelectorAll('.tabContent');
+const settingsBtn = document.getElementById('settingsBtn');
+const settingsPanel = document.getElementById('settingsPanel');
+const visualModeToggle = document.getElementById('visualModeToggle');
+const fullscreenModeToggle = document.getElementById('fullscreenModeToggle');
+const pauseVideoToggle = document.getElementById('pauseVideoToggle');
+const muteAudioToggle = document.getElementById('muteAudioToggle');
+const volumeControl = document.getElementById('volumeControl');
+const refreshPageToggle = document.getElementById('refreshPageToggle');
+const hideUIToggle = document.getElementById('hideUIToggle');
+const playButton = document.getElementById('playButton');
 
-/* Desktop hover invert */
-startBar.addEventListener('mouseover', () => document.body.classList.add('invert-background'));
-startBar.addEventListener('mouseout', () => document.body.classList.remove('invert-background'));
+// QR modal elements
+const qrModal = document.getElementById('qrModal');
+const qrModalOverlay = document.getElementById('qrModalOverlay');
+const qrProceedBtn = document.getElementById('qrProceedBtn');
+const qrCancelBtn = document.getElementById('qrCancelBtn');
 
-function startVideoExperience() {
-    videoContainer.style.display = 'block';
-    video.play().catch(() => {});
-    startBar.style.display = 'none';
-    document.querySelector('.welcome').style.display = 'none';
-    document.querySelector('.note').style.display = 'none';
-    qrTip.style.display = 'none';
+// set default volume to 50%
+video.volume = 0.5;
+volumeControl.value = 0.5;
+let previousVolume = volumeControl.value;
+
+// Disable Info button on landing
+qrBtn.classList.add('disabled');
+
+// --- START VIDEO FUNCTION (snap start: no fade) ---
+function startExperience(){
+    if(videoContainer.style.display !== 'block'){
+        videoContainer.style.display = 'block';
+        video.play().catch(()=>{});
+        // snap: hide welcome immediately (no fade)
+        const welcomeEl = document.querySelector('.welcome');
+        if(welcomeEl) welcomeEl.style.display = 'none';
+        // hide the start bar when video starts (normal behavior)
+        startBar.style.display = 'none';
+        playButton.style.display = 'none';
+        document.getElementById('qrTip').style.display = 'none';
+        qrBtn.classList.remove('disabled');
+    }
 }
 
-startBar.addEventListener('click', startVideoExperience);
-qrTip.addEventListener('click', startVideoExperience);
+// --- START EVENTS ---
+[startBar, playButton].forEach(el => el.addEventListener('click', startExperience));
 
-qrBtn.addEventListener('click', () => infoOverlay.style.display = 'flex');
+// --- BAR HOVER ---
+startBar.addEventListener('mouseenter', ()=>{ document.body.classList.add('bar-hovered'); });
+startBar.addEventListener('mouseleave', ()=>{ document.body.classList.remove('bar-hovered'); });
 
-videoContainer.addEventListener('click', e => {
-    if (e.target !== qrBtn && e.target !== fullscreenBtn) {
-        video.paused ? video.play() : video.pause();
+// --- INFO PANEL OPEN/CLOSE ---
+// Only apply blur (info-open) when hide-ui is NOT active.
+qrBtn.addEventListener('click', ()=>{ 
+    if(!qrBtn.classList.contains('disabled') && qrBtn.style.display !== 'none'){
+        closeQrModalImmediate();
+        infoOverlayLarge.style.display = 'flex';
+        if(!document.body.classList.contains('hide-ui')){
+            document.body.classList.add('info-open');
+        } else {
+            document.body.classList.remove('info-open');
+        }
+    }
+});
+closeInfoOverlay.addEventListener('click', ()=>{ infoOverlayLarge.style.display='none'; document.body.classList.remove('info-open'); });
+
+// --- TABS ---
+infoTabs.forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+        infoTabs.forEach(t=>t.classList.remove('active'));
+        tab.classList.add('active');
+        tabContents.forEach(c=>c.style.display='none');
+        document.getElementById(tab.dataset.tab).style.display='block';
+    });
+});
+
+// --- SETTINGS PANEL ---
+settingsBtn.addEventListener('click', ()=>{ settingsPanel.style.display = settingsPanel.style.display==='flex' ? 'none' : 'flex'; });
+
+// --- VISUAL MODE ---
+visualModeToggle.addEventListener('change', ()=>{ document.body.classList.toggle('dark-mode'); });
+
+// --- FULLSCREEN ---
+fullscreenModeToggle.addEventListener('change', ()=>{
+    if(fullscreenModeToggle.checked){
+        document.documentElement.requestFullscreen().catch(()=>{});
+    } else {
+        document.exitFullscreen().catch(()=>{});
     }
 });
 
-fullscreenBtn.addEventListener('click', () => {
-    const req = videoContainer.requestFullscreen || videoContainer.webkitRequestFullscreen;
-    if (req) req.call(videoContainer);
+// --- PAUSE VIDEO (settings toggle) ---
+pauseVideoToggle.addEventListener('change', ()=>{ 
+    if(pauseVideoToggle.checked){ video.pause(); } else { video.play(); }
 });
 
-closeBtn.addEventListener('click', () => {
-    infoOverlay.style.display = 'none';
-    video.pause();
-    video.currentTime = 0;
-    videoContainer.style.display = 'none';
-    startBar.style.display = 'block';
-    document.querySelector('.welcome').style.display = 'block';
-    document.querySelector('.note').style.display = 'block';
-    qrTip.style.display = 'flex';
+// --- MUTE AUDIO ---
+muteAudioToggle.addEventListener('change', ()=>{ video.muted = muteAudioToggle.checked; });
+
+// --- VOLUME ---
+volumeControl.addEventListener('input', ()=>{ video.volume = volumeControl.value; });
+
+// --- VIDEO PROGRESS & BUFFER ---
+video.addEventListener('timeupdate', ()=>{ if(video.duration) videoProgress.style.width = (video.currentTime / video.duration * 100) + '%'; });
+video.addEventListener('progress', ()=>{
+    if(video.buffered.length){
+        const bufferedEnd = video.buffered.end(video.buffered.length - 1);
+        const duration = video.duration || 1;
+        if(duration > 0) videoBuffered.style.width = (bufferedEnd / duration * 100) + '%';
+    }
 });
 
-/* Mobile auto invert */
-const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-if (isTouchDevice) {
-    let inverted = false;
-    setTimeout(() => {
-        setInterval(() => {
-            inverted = !inverted;
-            document.body.classList.toggle('invert-background', inverted);
-        }, 6000);
-    }, 2000);
+// --- RESET LANDING ---
+refreshPageToggle.addEventListener('change', ()=>{ if(refreshPageToggle.checked) location.reload(); });
+
+// --- HIDE UI ---
+// Uses body.hide-ui class so CSS can decide whether blur applies.
+// Behavior requested:
+//  - If still on landing (video NOT started): keep the line bar visible even when Hide UI is ON.
+//  - If video has started: do NOT bring back the line bar when toggling Hide UI.
+hideUIToggle.addEventListener('change', ()=>{
+    if(hideUIToggle.checked){
+        document.body.classList.add('hide-ui');
+        // Hide landing elements (but keep welcome text visible)
+        playButton.style.display = 'none';
+        document.getElementById('qrTip').style.display = 'none';
+        // Hide video overlay elements
+        qrBtn.style.display = 'none';
+        infoOverlayLarge.style.display = 'none';
+        qrBtn.classList.add('disabled');
+        // prevent blur
+        document.body.classList.remove('info-open');
+        // close any open modal
+        closeQrModalImmediate();
+
+        // KEY: Only force the start bar visible if the video has NOT started (landing).
+        if(videoContainer.style.display !== 'block'){
+            startBar.style.display = 'block';
+        }
+        // If the video has already started, do NOT change the startBar visibility (leave it hidden).
+
+    } else {
+        // turning Hide UI off
+        document.body.classList.remove('hide-ui');
+
+        // If video has NOT started, restore landing elements (including bar)
+        if(videoContainer.style.display !== 'block'){
+            playButton.style.display = 'block';
+            startBar.style.display = 'block';
+            document.getElementById('qrTip').style.display = 'flex';
+            qrBtn.classList.add('disabled');
+        } else {
+            // If the video has started, do NOT bring back the startBar (respect normal started-state).
+            // Restore overlay QR button if applicable
+            if(videoContainer.style.display === 'block'){
+                qrBtn.style.display = 'flex';
+                qrBtn.classList.remove('disabled');
+                if(infoOverlayLarge.style.display === 'flex'){
+                    document.body.classList.add('info-open');
+                }
+            }
+        }
+    }
+});
+
+// --- QR TIP CLICK => MODAL (landing QR) ---
+qrTip.addEventListener('click', ()=>{
+    if(hideUIToggle.checked) return;
+    infoOverlayLarge.style.display = 'none';
+    document.body.classList.remove('info-open');
+    openQrModal();
+});
+
+// open & close functions for QR modal
+function openQrModal(){
+    qrModal.classList.add('open');
+    qrModalOverlay.classList.add('open');
+    qrModal.style.display = 'block';
+    qrModalOverlay.style.display = 'block';
+    qrProceedBtn.focus();
 }
-</script>
 
+function closeQrModal(){
+    qrModal.classList.remove('open');
+    qrModalOverlay.classList.remove('open');
+    setTimeout(()=>{
+        qrModal.style.display = 'none';
+        qrModalOverlay.style.display = 'none';
+    }, 180);
+}
+
+function closeQrModalImmediate(){
+    qrModal.classList.remove('open');
+    qrModalOverlay.classList.remove('open');
+    qrModal.style.display = 'none';
+    qrModalOverlay.style.display = 'none';
+}
+
+// modal controls
+qrCancelBtn.addEventListener('click', closeQrModal);
+qrModalOverlay.addEventListener('click', closeQrModal);
+qrProceedBtn.addEventListener('click', ()=>{
+    window.open('https://solidstate872.github.io/comingsoon/', '_blank', 'noopener');
+    closeQrModal();
+});
+
+// close modal with Escape
+window.addEventListener('keydown', (e)=>{
+    if(e.key === 'Escape'){
+        if(qrModal.style.display === 'block'){ closeQrModal(); }
+        else if(infoOverlayLarge.style.display === 'flex'){ infoOverlayLarge.style.display = 'none'; document.body.classList.remove('info-open'); }
+    }
+});
+
+// --- TAP / CLICK TO PAUSE/PLAY (pointer input) ---
+// Toggles playback and keeps Pause toggle in sync.
+function togglePlayPause(){
+    if(video.paused){
+        video.play().catch(()=>{});
+        pauseVideoToggle.checked = false;
+    } else {
+        video.pause();
+        pauseVideoToggle.checked = true;
+    }
+}
+
+// Use pointerup so both touch and mouse work well
+video.addEventListener('pointerup', (e)=>{
+    // only toggle when the video is visible (started)
+    if(videoContainer.style.display === 'block'){
+        togglePlayPause();
+    }
+});
+</script>
 </body>
 </html>
-
