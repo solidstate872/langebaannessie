@@ -1,4 +1,4 @@
-<!-- Build 0.1.4d — Boss pass — 2026-01-06 -->
+<!-- Build 0.1.5 — Boss pass — 2026-01-08 (Info panel upgraded) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -36,11 +36,13 @@ body.bar-hovered{background:#222;color:#fefefe}
 .qr-box.disabled{pointer-events:none;opacity:.4}
 .qr-box:hover:not(.disabled){transform:scale(1.05);box-shadow:0 8px 28px rgba(0,0,0,.6)}
 
-/* --- INFO PANEL --- */
+/* --- INFO PANEL (VERTICAL SLIDERS) --- */
 /* blur applies only when body.info-open AND NOT body.hide-ui */
 body.info-open:not(.hide-ui) #videoPlayer{filter:blur(6px) brightness(.7)}
-#infoOverlayLarge{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:90%;max-width:640px;height:80%;background:#fff;color:#222;display:none;flex-direction:column;z-index:20;border-radius:16px;padding:24px;box-sizing:border-box;overflow:hidden;text-align:justify;justify-content:flex-start;box-shadow:0 12px 30px rgba(0,0,0,.2);transition:background-color .5s,color .5s,backdrop-filter .3s,opacity .3s}
+#infoOverlayLarge{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:90%;max-width:720px;height:80%;background:#fff;color:#222;display:none;flex-direction:row;z-index:20;border-radius:16px;padding:24px;overflow:hidden;box-shadow:0 12px 30px rgba(0,0,0,.2);transition:background-color .5s,color .5s,opacity .3s}
 body.info-open{overflow:hidden}
+
+/* Close button */
 #closeInfoOverlay{position:absolute;top:12px;right:12px;width:28px;height:28px;background:#ccc;border:0;border-radius:6px;display:flex;justify-content:center;align-items:center;cursor:pointer;z-index:21;transition:.2s}
 #closeInfoOverlay::before,#closeInfoOverlay::after{content:'';position:absolute;width:2px;height:16px;background:#222}
 #closeInfoOverlay::before{transform:rotate(45deg)}
@@ -48,14 +50,20 @@ body.info-open{overflow:hidden}
 #closeInfoOverlay:hover{background:#26A6FF}
 #closeInfoOverlay:hover::before,#closeInfoOverlay:hover::after{background:#fff}
 
-/* --- INFO TABS --- */
-#infoTabs{display:flex;justify-content:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
-#infoTabs button{padding:6px 12px;border-radius:10px;border:0;background:rgba(38,166,255,.5);font-weight:700;cursor:pointer;transition:.2s;font-size:.85rem;color:#fff}
-#infoTabs button.active{background:#26A6FF}
-.tabContent{display:none;flex:1;overflow-y:auto;padding:8px 0;scrollbar-width:thin;scrollbar-color:#26A6FF #ccc}
-.tabContent::-webkit-scrollbar{width:6px}
-.tabContent::-webkit-scrollbar-track{background:#ccc;border-radius:3px}
-.tabContent::-webkit-scrollbar-thumb{background:#26A6FF;border-radius:3px}
+/* Vertical Tabs */
+#infoVerticalTabs{display:flex;flex-direction:column;width:140px;gap:8px;margin-right:16px;flex-shrink:0}
+#infoVerticalTabs button{padding:12px 8px;border-radius:10px;border:0;background:rgba(38,166,255,0.2);font-weight:700;cursor:pointer;transition:.2s,transform .2s;text-align:left;color:#222}
+#infoVerticalTabs button.active,#infoVerticalTabs button:hover{background:#26A6FF;color:#fff;transform:translateX(4px)}
+
+/* Content */
+#infoContent{flex:1;display:flex;overflow:hidden;border-left:1px solid rgba(0,0,0,.1);position:relative}
+.tabContent{display:none;flex:1;overflow-y:auto;padding:8px 16px;scrollbar-width:thin;scrollbar-color:#26A6FF rgba(0,0,0,.05)}
+.tabContent::-webkit-scrollbar{width:8px}
+.tabContent::-webkit-scrollbar-track{background:rgba(0,0,0,0.05);border-radius:4px}
+.tabContent::-webkit-scrollbar-thumb{background-color:#26A6FF;border-radius:4px;border:2px solid rgba(0,0,0,0);background-clip:padding-box;transition:background-color .2s}
+.tabContent::-webkit-scrollbar-thumb:hover{background-color:#1e6bbf}
+.tabContent::-webkit-scrollbar{opacity:0.4;transition:opacity .25s}
+.tabContent:hover::-webkit-scrollbar{opacity:1}
 
 /* --- SETTINGS TOP RIGHT --- */
 #settingsWrapper{position:fixed;top:12px;right:12px;z-index:25;display:flex;flex-direction:column;align-items:flex-end}
@@ -134,14 +142,18 @@ body.dark-mode .mapWrapper iframe{filter:invert(1) hue-rotate(180deg)}
     <div id="qrBtn" class="qr-box disabled" title="Open info">Info</div>
 </div>
 
-<!-- INFO PANEL -->
+<!-- INFO PANEL (REPLACED WITH VERTICAL SLIDERS DESIGN) -->
 <div id="infoOverlayLarge">
     <button id="closeInfoOverlay" aria-label="Close info"></button>
-    <div id="infoTabs">
+
+    <!-- Vertical Tabs -->
+    <div id="infoVerticalTabs">
         <button class="tabBtn active" data-tab="about">About Us</button>
         <button class="tabBtn" data-tab="bookings">Bookings</button>
         <button class="tabBtn" data-tab="contact">Contact Us</button>
     </div>
+
+    <!-- Content Area -->
     <div id="infoContent">
         <div class="tabContent" id="about" style="display:block">
             <h2>About Langebaan Nessie</h2>
@@ -159,6 +171,7 @@ body.dark-mode .mapWrapper iframe{filter:invert(1) hue-rotate(180deg)}
                 </iframe>
             </div>
         </div>
+
         <div class="tabContent" id="bookings">
             <h2>Bookings & Pricing</h2>
             <p>Contact us directly for bookings.</p>
@@ -166,6 +179,7 @@ body.dark-mode .mapWrapper iframe{filter:invert(1) hue-rotate(180deg)}
             <p>Phone: +27 66 469 7838<br>Email: info@langebaannessie.co.za</p>
             <p class="bookingsNote">(A 60% deposit is payable upfront to secure your booking. Cancellations made less than 3 days before the booking are non-refundable. Check-in: From 14:00 (2:00 PM). Check-out: By 10:00 (10:00 AM) the following day)</p>
         </div>
+
         <div class="tabContent" id="contact">
             <h2>Contact Us</h2>
             <p>Phone: +27 66 469 7838<br>Email: info@langebaannessie.co.za<br>Operating during standard hours. Excluding Sundays and public holidays.</p>
@@ -234,7 +248,7 @@ body.dark-mode .mapWrapper iframe{filter:invert(1) hue-rotate(180deg)}
 </div>
 
 <!-- FOOTER -->
-<div id="buildNo">Build No. 0.1.4d</div>
+<div id="buildNo">Build No. 0.1.5</div>
 <div id="copyright">© 2026 · All rights reserved</div>
 
 <!-- QR library -->
@@ -305,6 +319,7 @@ startBar.addEventListener('mouseleave', ()=>{ document.body.classList.remove('ba
 
 // --- INFO PANEL OPEN/CLOSE ---
 // Only apply blur (info-open) when hide-ui is NOT active.
+// Using original logic but with vertical tabs markup.
 qrBtn.addEventListener('click', ()=>{ 
     if(!qrBtn.classList.contains('disabled') && qrBtn.style.display !== 'none'){
         closeQrModalImmediate();
@@ -319,6 +334,7 @@ qrBtn.addEventListener('click', ()=>{
 closeInfoOverlay.addEventListener('click', ()=>{ infoOverlayLarge.style.display='none'; document.body.classList.remove('info-open'); });
 
 // --- TABS ---
+// Works with vertical tabs because they still use class "tabBtn"
 infoTabs.forEach(tab=>{
     tab.addEventListener('click', ()=>{
         infoTabs.forEach(t=>t.classList.remove('active'));
