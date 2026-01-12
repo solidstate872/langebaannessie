@@ -1,4 +1,4 @@
-<!-- Build 0.1.5 — Boss pass — 2026-01-08 (Info panel upgraded) -->
+<!-- Build 0.1.6 — Boss pass — 2026-01-08 (Info panel upgraded) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,17 +7,24 @@
 <title>Langebaan Nessie</title>
 <style>
 /* --- BASE --- */
-html,body{margin:0;padding:0;width:100%;height:100%;font-family:'Segoe UI',sans-serif;display:flex;justify-content:center;align-items:center;overflow:hidden;text-align:center;transition:background-color .5s,color .5s}
+html,body{margin:0;padding:0;width:100%;height:100%;font-family:'Segoe UI',sans-serif;display:flex;justify-content:center;align-items:center;overflow:hidden;text-align:center;transition:background-color .3s,color .3s}
 body{background:#fefefe;color:#222}
 
 /* --- LANDING TEXT --- */
-.welcome{font-size:clamp(1rem,4vh,2rem);margin-bottom:10vh;z-index:3;cursor:pointer;transition:none} /* snap: removed fade */
+.welcome{position:absolute;bottom:calc(50% + 14px + 60px);left:50%;transform:translateX(-50%);width:90%;max-width:600px;font-size:clamp(0.7rem,2.2vw,1.6rem);z-index:3;cursor:pointer;transition:none;line-height:1.3;padding:0 16px;box-sizing:border-box;word-wrap:break-word;overflow-wrap:break-word;text-align:center} /* Positioned above bar: 14px (bar height) + 60px safe gap to prevent overlap */
+.welcome .no-break{white-space:nowrap} /* Prevents line breaks within phrases that should stay together */
+/* Responsive adjustments for different screen sizes and orientations */
+@media (max-height:500px) and (orientation:landscape){.welcome{font-size:clamp(0.6rem,1.8vw,1rem);bottom:calc(50% + 14px + 40px);line-height:1.2}}
+@media (max-width:768px) and (orientation:portrait){.welcome{font-size:clamp(0.7rem,3vw,1.4rem);bottom:calc(50% + 14px + 50px)}}
+@media (max-width:480px){.welcome{font-size:clamp(0.65rem,3.2vw,1.25rem);bottom:calc(50% + 14px + 45px);width:95%;padding:0 12px}}
+@media (max-width:320px){.welcome{font-size:clamp(0.6rem,3vw,1.1rem);bottom:calc(50% + 14px + 40px);line-height:1.25}}
 
 /* --- FULL WIDTH BAR --- */
-.bar{position:absolute;top:50%;left:0;width:100%;height:14px;background:#222;cursor:pointer;border-radius:8px;z-index:3;transition:.3s}
+.bar{position:absolute;top:50%;left:0;width:100%;height:14px;background:#222;cursor:pointer;z-index:3;transition:background .3s}
 
-/* --- HOVER EFFECT FOR BACKGROUND/HEADING ONLY --- */
-body.bar-hovered{background:#222;color:#fefefe}
+/* --- HOVER EFFECT: INVERT BACKGROUND AND BAR ONLY --- */
+body.bar-hovered{background:#222;color:#fff}
+body.bar-hovered .bar{background:#fff}
 
 /* --- PLAY BUTTON --- */
 #playButton{position:absolute;top:calc(50% + 30px);left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#26A6FF,#1e6bbf);color:#fff;font-weight:700;font-size:1.25rem;padding:16px 48px;border:0;border-radius:12px;cursor:pointer;z-index:3;box-shadow:0 6px 20px rgba(0,0,0,.3);transition:.3s}
@@ -38,26 +45,33 @@ body.bar-hovered{background:#222;color:#fefefe}
 
 /* --- INFO PANEL (VERTICAL SLIDERS) --- */
 /* blur applies only when body.info-open AND NOT body.hide-ui */
-body.info-open:not(.hide-ui) #videoPlayer{filter:blur(6px) brightness(.7)}
-#infoOverlayLarge{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:90%;max-width:720px;height:80%;background:#fff;color:#222;display:none;flex-direction:row;z-index:20;border-radius:16px;padding:24px;overflow:hidden;box-shadow:0 12px 30px rgba(0,0,0,.2);transition:background-color .5s,color .5s,opacity .3s}
+body.info-open:not(.hide-ui) #videoPlayer{filter:blur(6px) brightness(.7);transition:filter .4s ease}
+#infoOverlayLarge{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.95);width:90%;max-width:720px;height:80%;background:#fff;color:#222;display:none;flex-direction:row;z-index:20;border-radius:16px;padding:24px;overflow:hidden;box-shadow:0 12px 30px rgba(0,0,0,.2);transition:background-color .5s,color .5s,opacity .4s ease,transform .4s cubic-bezier(0.34, 1.56, 0.64, 1);opacity:0}
+#infoOverlayLarge.open{opacity:1;transform:translate(-50%,-50%) scale(1)}
 body.info-open{overflow:hidden}
 
 /* Close button */
-#closeInfoOverlay{position:absolute;top:12px;right:12px;width:28px;height:28px;background:#ccc;border:0;border-radius:6px;display:flex;justify-content:center;align-items:center;cursor:pointer;z-index:21;transition:.2s}
-#closeInfoOverlay::before,#closeInfoOverlay::after{content:'';position:absolute;width:2px;height:16px;background:#222}
+#closeInfoOverlay{position:absolute;top:12px;right:12px;width:28px;height:28px;background:#ccc;border:0;border-radius:6px;display:flex;justify-content:center;align-items:center;cursor:pointer;z-index:21;transition:background .3s,transform .2s}
+#closeInfoOverlay::before,#closeInfoOverlay::after{content:'';position:absolute;width:2px;height:16px;background:#222;transition:background .3s,transform .2s}
 #closeInfoOverlay::before{transform:rotate(45deg)}
 #closeInfoOverlay::after{transform:rotate(-45deg)}
-#closeInfoOverlay:hover{background:#26A6FF}
+#closeInfoOverlay:hover{background:#26A6FF;transform:rotate(90deg)}
 #closeInfoOverlay:hover::before,#closeInfoOverlay:hover::after{background:#fff}
 
 /* Vertical Tabs */
 #infoVerticalTabs{display:flex;flex-direction:column;width:140px;gap:8px;margin-right:16px;flex-shrink:0}
-#infoVerticalTabs button{padding:12px 8px;border-radius:10px;border:0;background:rgba(38,166,255,0.2);font-weight:700;cursor:pointer;transition:.2s,transform .2s;text-align:left;color:#222}
-#infoVerticalTabs button.active,#infoVerticalTabs button:hover{background:#26A6FF;color:#fff;transform:translateX(4px)}
+#infoVerticalTabs button{padding:12px 8px;border-radius:10px;border:0;background:rgba(38,166,255,0.2);font-weight:700;cursor:pointer;transition:all .3s cubic-bezier(0.4, 0, 0.2, 1);text-align:left;color:#222;position:relative;overflow:hidden}
+#infoVerticalTabs button::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:rgba(255,255,255,0.2);transition:left .3s ease}
+#infoVerticalTabs button:hover::before{left:0}
+#infoVerticalTabs button.active,#infoVerticalTabs button:hover{background:#26A6FF;color:#fff;transform:translateX(6px);box-shadow:0 4px 12px rgba(38,166,255,0.3)}
+#infoVerticalTabs button.active{animation:tabPulse .6s ease}
+@keyframes tabPulse{0%{transform:translateX(6px) scale(1)}50%{transform:translateX(6px) scale(1.02)}100%{transform:translateX(6px) scale(1)}}
 
 /* Content */
 #infoContent{flex:1;display:flex;overflow:hidden;border-left:1px solid rgba(0,0,0,.1);position:relative}
-.tabContent{display:none;flex:1;overflow-y:auto;padding:8px 16px;scrollbar-width:thin;scrollbar-color:#26A6FF rgba(0,0,0,.05)}
+.tabContent{display:none;flex:1;overflow-y:auto;padding:8px 16px;scrollbar-width:thin;scrollbar-color:#26A6FF rgba(0,0,0,.05);opacity:0;transform:translateX(20px);transition:opacity .4s cubic-bezier(0.4, 0, 0.2, 1),transform .4s cubic-bezier(0.4, 0, 0.2, 1)}
+.tabContent.active{display:block;opacity:1;transform:translateX(0);animation:contentFadeIn .4s ease}
+@keyframes contentFadeIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
 .tabContent::-webkit-scrollbar{width:8px}
 .tabContent::-webkit-scrollbar-track{background:rgba(0,0,0,0.05);border-radius:4px}
 .tabContent::-webkit-scrollbar-thumb{background-color:#26A6FF;border-radius:4px;border:2px solid rgba(0,0,0,0);background-clip:padding-box;transition:background-color .2s}
@@ -90,6 +104,11 @@ body.dark-mode .qr-box{background:#222;color:#fff}
 body.dark-mode #infoOverlayLarge{background:#222;color:#fff}
 body.dark-mode #settingsPanel{background:#333;color:#fff}
 body.dark-mode #settingsBtn{background:#26A6FF;color:#fff}
+body.dark-mode #buildNo,body.dark-mode #copyright{color:#aaa}
+
+/* --- BAR HOVER IN DARK MODE: INVERT BACKGROUND AND BAR --- */
+body.dark-mode.bar-hovered{background:#fff;color:#222}
+body.dark-mode.bar-hovered .bar{background:#222}
 
 /* --- QR MODAL + OVERLAY --- */
 #qrModalOverlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.25);backdrop-filter:blur(3px);z-index:29;opacity:0;transition:opacity .18s ease}
@@ -119,7 +138,7 @@ body.dark-mode .mapWrapper iframe{filter:invert(1) hue-rotate(180deg)}
 
 <!-- LANDING TEXT -->
 <div class="welcome">
-    Welcome to <span style="color:#26A6FF;">theVideopage<sup>TM</sup></span> of “Langebaan Nessie”
+    Welcome to <span style="color:#26A6FF;">theVideopage<sup>TM</sup></span> of "<span class="no-break">Langebaan Nessie</span>"
 </div>
 
 <!-- START BAR -->
@@ -155,7 +174,7 @@ body.dark-mode .mapWrapper iframe{filter:invert(1) hue-rotate(180deg)}
 
     <!-- Content Area -->
     <div id="infoContent">
-        <div class="tabContent" id="about" style="display:block">
+        <div class="tabContent active" id="about" style="display:block;opacity:1;transform:translateX(0)">
             <h2>About Langebaan Nessie</h2>
             <p><strong>South Africa, Western Cape, Langebaan, 3 Jutten, 7357</strong></p>
             <p>
@@ -164,11 +183,10 @@ body.dark-mode .mapWrapper iframe{filter:invert(1) hue-rotate(180deg)}
             <p>
                 "At Langebaan Nessie, we invite you to slow down and enjoy the moment. Langebaan Nessie is a self-catering apartment within walking distance of the sea, shops, coffee cafés, and Spar. It is the ideal place for guests seeking a peaceful, comfortable stay in the heart of Langebaan."
             </p>
-            <div class="mapWrapper">
-                <iframe 
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3342.827890596172!2d18.033365576403195!3d-33.08731227353564!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1c34aa1d531732c7%3A0xca65cb64ada8f411!2s3%20Jutten%20St%2C%20Langebaan%2C%207357!5e0!3m2!1sen!2sza!4v1767691309825!5m2!1sen!2sza" 
-                    width="400" height="300" style="border:0" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
-                </iframe>
+
+            <!-- LOGO (added, centered, under text) -->
+            <div style="margin-top:16px;text-align:center">
+                <img src="logo.png" alt="Langebaan Nessie Logo" style="max-width:180px;width:100%;height:auto">
             </div>
         </div>
 
@@ -183,6 +201,14 @@ body.dark-mode .mapWrapper iframe{filter:invert(1) hue-rotate(180deg)}
         <div class="tabContent" id="contact">
             <h2>Contact Us</h2>
             <p>Phone: +27 66 469 7838<br>Email: info@langebaannessie.co.za<br>Operating during standard hours. Excluding Sundays and public holidays.</p>
+
+            <!-- MAP MOVED FROM ABOUT US -->
+            <div class="mapWrapper">
+                <iframe 
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3342.827890596172!2d18.033365576403195!3d-33.08731227353564!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1c34aa1d531732c7%3A0xca65cb64ada8f411!2s3%20Jutten%20St%2C%20Langebaan%2C%207357!5e0!3m2!1sen!2sza!4v1767691309825!5m2!1sen!2sza" 
+                    width="400" height="300" style="border:0" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+            </div>
         </div>
     </div>
 </div>
@@ -324,6 +350,10 @@ qrBtn.addEventListener('click', ()=>{
     if(!qrBtn.classList.contains('disabled') && qrBtn.style.display !== 'none'){
         closeQrModalImmediate();
         infoOverlayLarge.style.display = 'flex';
+        // Trigger animation by adding open class after display is set
+        setTimeout(()=>{
+            infoOverlayLarge.classList.add('open');
+        }, 10);
         if(!document.body.classList.contains('hide-ui')){
             document.body.classList.add('info-open');
         } else {
@@ -331,16 +361,36 @@ qrBtn.addEventListener('click', ()=>{
         }
     }
 });
-closeInfoOverlay.addEventListener('click', ()=>{ infoOverlayLarge.style.display='none'; document.body.classList.remove('info-open'); });
+closeInfoOverlay.addEventListener('click', ()=>{ 
+    infoOverlayLarge.classList.remove('open');
+    setTimeout(()=>{
+        infoOverlayLarge.style.display='none';
+        document.body.classList.remove('info-open');
+    }, 400);
+});
 
 // --- TABS ---
 // Works with vertical tabs because they still use class "tabBtn"
 infoTabs.forEach(tab=>{
     tab.addEventListener('click', ()=>{
+        // Remove active from all tabs and content
         infoTabs.forEach(t=>t.classList.remove('active'));
+        tabContents.forEach(c=>{
+            c.classList.remove('active');
+            c.style.display='none';
+        });
+        
+        // Add active to clicked tab
         tab.classList.add('active');
-        tabContents.forEach(c=>c.style.display='none');
-        document.getElementById(tab.dataset.tab).style.display='block';
+        
+        // Show new content with animation
+        const targetContent = document.getElementById(tab.dataset.tab);
+        setTimeout(()=>{
+            targetContent.style.display='block';
+            // Force reflow to trigger animation
+            void targetContent.offsetWidth;
+            targetContent.classList.add('active');
+        }, 50);
     });
 });
 
@@ -396,7 +446,10 @@ hideUIToggle.addEventListener('change', ()=>{
         document.getElementById('qrTip').style.display = 'none';
         // Hide video overlay elements
         qrBtn.style.display = 'none';
-        infoOverlayLarge.style.display = 'none';
+        infoOverlayLarge.classList.remove('open');
+        setTimeout(()=>{
+            infoOverlayLarge.style.display = 'none';
+        }, 400);
         qrBtn.classList.add('disabled');
         // prevent blur
         document.body.classList.remove('info-open');
@@ -426,6 +479,7 @@ hideUIToggle.addEventListener('change', ()=>{
                 qrBtn.style.display = 'flex';
                 qrBtn.classList.remove('disabled');
                 if(infoOverlayLarge.style.display === 'flex'){
+                    infoOverlayLarge.classList.add('open');
                     document.body.classList.add('info-open');
                 }
             }
@@ -436,8 +490,11 @@ hideUIToggle.addEventListener('change', ()=>{
 // --- QR TIP CLICK => MODAL (landing QR) ---
 qrTip.addEventListener('click', ()=>{
     if(hideUIToggle.checked) return;
-    infoOverlayLarge.style.display = 'none';
-    document.body.classList.remove('info-open');
+    infoOverlayLarge.classList.remove('open');
+    setTimeout(()=>{
+        infoOverlayLarge.style.display = 'none';
+        document.body.classList.remove('info-open');
+    }, 400);
     openQrModal();
 });
 
@@ -478,7 +535,13 @@ qrProceedBtn.addEventListener('click', ()=>{
 window.addEventListener('keydown', (e)=>{
     if(e.key === 'Escape'){
         if(qrModal.style.display === 'block'){ closeQrModal(); }
-        else if(infoOverlayLarge.style.display === 'flex'){ infoOverlayLarge.style.display = 'none'; document.body.classList.remove('info-open'); }
+        else if(infoOverlayLarge.style.display === 'flex'){ 
+            infoOverlayLarge.classList.remove('open');
+            setTimeout(()=>{
+                infoOverlayLarge.style.display='none';
+                document.body.classList.remove('info-open');
+            }, 400);
+        }
     }
 });
 
