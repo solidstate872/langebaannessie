@@ -1,4 +1,3 @@
-<!-- Build 0.1.6 — Boss pass — 2026-01-08 (Info panel upgraded) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,207 +6,367 @@
 <title>Langebaan Nessie</title>
 <style>
 /* --- BASE --- */
-html,body{margin:0;padding:0;width:100%;height:100%;font-family:'Segoe UI',sans-serif;display:flex;justify-content:center;align-items:center;overflow:hidden;text-align:center;transition:background-color .3s,color .3s}
-body{background:#fefefe;color:#222}
+:root{
+  --accent:#26A6FF;
+  --accent-dark:#1e6bbf;
+  --bg:#fefefe;
+  --fg:#222;
+  --panel-bg:#fff;
+  --shadow:0 12px 30px rgba(0,0,0,.15);
+}
+html,body{margin:0;padding:0;width:100%;height:100%;font-family:'Segoe UI',system-ui,Roboto,"Helvetica Neue",Arial,sans-serif;display:flex;justify-content:center;align-items:center;overflow:hidden;background:var(--bg);color:var(--fg);transition:background-color .25s,color .25s}
 
 /* --- LANDING TEXT --- */
-.welcome{position:absolute;bottom:calc(50% + 14px + 60px);left:50%;transform:translateX(-50%);width:90%;max-width:600px;font-size:clamp(0.7rem,2.2vw,1.6rem);z-index:3;cursor:pointer;transition:none;line-height:1.3;padding:0 16px;box-sizing:border-box;word-wrap:break-word;overflow-wrap:break-word;text-align:center} /* Positioned above bar: 14px (bar height) + 60px safe gap to prevent overlap */
-.welcome .no-break{white-space:nowrap} /* Prevents line breaks within phrases that should stay together */
-/* Responsive adjustments for different screen sizes and orientations */
-@media (max-height:500px) and (orientation:landscape){.welcome{font-size:clamp(0.6rem,1.8vw,1rem);bottom:calc(50% + 14px + 40px);line-height:1.2}}
+.welcome{position:absolute;bottom:calc(50% + 14px + 60px);left:50%;transform:translateX(-50%);width:90%;max-width:680px;font-size:clamp(0.75rem,2.2vw,1.6rem);z-index:30;cursor:pointer;line-height:1.3;padding:0 16px;box-sizing:border-box;text-align:center}
+.welcome .no-break{white-space:nowrap}
+
+@media (max-height:520px) and (orientation:landscape){.welcome{font-size:clamp(0.6rem,1.8vw,1rem);bottom:calc(50% + 14px + 40px);line-height:1.2}}
 @media (max-width:768px) and (orientation:portrait){.welcome{font-size:clamp(0.7rem,3vw,1.4rem);bottom:calc(50% + 14px + 50px)}}
 @media (max-width:480px){.welcome{font-size:clamp(0.65rem,3.2vw,1.25rem);bottom:calc(50% + 14px + 45px);width:95%;padding:0 12px}}
-@media (max-width:320px){.welcome{font-size:clamp(0.6rem,3vw,1.1rem);bottom:calc(50% + 14px + 40px);line-height:1.25}}
 
 /* --- FULL WIDTH BAR --- */
-.bar{position:absolute;top:50%;left:0;width:100%;height:14px;background:#222;cursor:pointer;z-index:3;transition:background .3s}
-
-/* --- HOVER EFFECT: INVERT BACKGROUND AND BAR ONLY --- */
+.bar{position:absolute;top:50%;left:0;width:100%;height:14px;background:#222;cursor:pointer;z-index:28;transition:background .25s}
 body.bar-hovered{background:#222;color:#fff}
 body.bar-hovered .bar{background:#fff}
 
 /* --- PLAY BUTTON --- */
-#playButton{position:absolute;top:calc(50% + 30px);left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#26A6FF,#1e6bbf);color:#fff;font-weight:700;font-size:1.25rem;padding:16px 48px;border:0;border-radius:12px;cursor:pointer;z-index:3;box-shadow:0 6px 20px rgba(0,0,0,.3);transition:.3s}
-#playButton:hover{transform:translateX(-50%) scale(1.05);box-shadow:0 8px 28px rgba(0,0,0,.4)}
+#playButton{position:absolute;top:calc(50% + 30px);left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--accent),var(--accent-dark));color:#fff;font-weight:700;font-size:1.1rem;padding:14px 44px;border:0;border-radius:12px;cursor:pointer;z-index:30;box-shadow:0 6px 20px rgba(0,0,0,.22);transition:transform .18s,box-shadow .18s}
+#playButton:hover{transform:translateX(-50%) scale(1.04);box-shadow:0 8px 28px rgba(0,0,0,.28)}
 
 /* --- VIDEO --- */
 #videoContainer{position:absolute;top:0;left:0;width:100%;height:100%;display:none}
-#videoPlayer{width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;z-index:1;transition:filter .3s,opacity .5s}
-.grid-overlay{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;background-image:linear-gradient(to right,rgba(0,0,0,.15) 1px,transparent 1px),linear-gradient(to bottom,rgba(0,0,0,.15) 1px,transparent 1px);background-size:5px 5px;z-index:2}
-#videoBuffered,#videoProgress{position:absolute;bottom:0;left:0;height:4px;transition:width .25s linear;z-index:5}
-#videoBuffered{background:#ccc;z-index:4}
-#videoProgress{background:#26A6FF}
+#videoPlayer{width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;z-index:8;transition:filter .3s,opacity .4s}
+.grid-overlay{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;background-image:linear-gradient(to right,rgba(0,0,0,.12) 1px,transparent 1px),linear-gradient(to bottom,rgba(0,0,0,.12) 1px,transparent 1px);background-size:6px 6px;z-index:9}
+#videoBuffered,#videoProgress{position:absolute;bottom:0;left:0;height:4px;transition:width .2s linear;z-index:26}
+#videoBuffered{background:#ddd;z-index:24}
+#videoProgress{background:var(--accent)}
 
 /* --- QR BOX --- */
-.qr-box{position:fixed;bottom:20px;right:20px;width:110px;height:110px;background:#fff;display:flex;justify-content:center;align-items:center;border-radius:14px;box-shadow:0 6px 24px rgba(0,0,0,.5);cursor:pointer;font-weight:700;font-size:.85rem;color:#000;z-index:12;transition:.2s}
-.qr-box.disabled{pointer-events:none;opacity:.4}
-.qr-box:hover:not(.disabled){transform:scale(1.05);box-shadow:0 8px 28px rgba(0,0,0,.6)}
+.qr-box{position:fixed;bottom:20px;right:20px;width:110px;height:110px;background:var(--panel-bg);display:flex;justify-content:center;align-items:center;border-radius:14px;box-shadow:0 6px 24px rgba(0,0,0,.45);cursor:pointer;font-weight:700;font-size:.85rem;color:var(--fg);z-index:40;transition:transform .12s,opacity .12s}
+.qr-box.disabled{pointer-events:none;opacity:.5}
+.qr-box:hover:not(.disabled){transform:scale(1.04)}
 
-/* --- INFO PANEL (VERTICAL SLIDERS) --- */
-/* blur applies only when body.info-open AND NOT body.hide-ui */
-body.info-open:not(.hide-ui) #videoPlayer{filter:blur(6px) brightness(.7);transition:filter .4s ease}
-#infoOverlayLarge{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.95);width:90%;max-width:720px;height:80%;background:#fff;color:#222;display:none;flex-direction:row;z-index:20;border-radius:16px;padding:24px;overflow:hidden;box-shadow:0 12px 30px rgba(0,0,0,.2);transition:background-color .5s,color .5s,opacity .4s ease,transform .4s cubic-bezier(0.34, 1.56, 0.64, 1);opacity:0}
+/* --- INFO PANEL (RESPONSIVE WITH COLLAPSIBLE MENU) --- */
+body.info-open:not(.hide-ui) #videoPlayer{filter:blur(6px) brightness(.72)}
+#infoOverlayLarge{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.98);width:92%;max-width:760px;height:80%;max-height:90vh;background:var(--panel-bg);color:var(--fg);display:none;flex-direction:row;z-index:60;border-radius:14px;padding:20px;overflow:hidden;box-shadow:var(--shadow);transition:opacity .32s,transform .38s;opacity:0}
 #infoOverlayLarge.open{opacity:1;transform:translate(-50%,-50%) scale(1)}
-body.info-open{overflow:hidden}
 
-/* Close button */
-#closeInfoOverlay{position:absolute;top:12px;right:12px;width:28px;height:28px;background:#ccc;border:0;border-radius:6px;display:flex;justify-content:center;align-items:center;cursor:pointer;z-index:21;transition:background .3s,transform .2s}
-#closeInfoOverlay::before,#closeInfoOverlay::after{content:'';position:absolute;width:2px;height:16px;background:#222;transition:background .3s,transform .2s}
+#closeInfoOverlay{position:absolute;top:12px;right:12px;width:30px;height:30px;background:#e6e6e6;border:0;border-radius:6px;display:flex;justify-content:center;align-items:center;cursor:pointer;z-index:61;transition:all .2s}
+#closeInfoOverlay::before,#closeInfoOverlay::after{content:'';position:absolute;width:2px;height:16px;background:#222;transition:background .2s}
 #closeInfoOverlay::before{transform:rotate(45deg)}
 #closeInfoOverlay::after{transform:rotate(-45deg)}
-#closeInfoOverlay:hover{background:#26A6FF;transform:rotate(90deg)}
+#closeInfoOverlay:hover{background:var(--accent);transform:rotate(90deg)}
 #closeInfoOverlay:hover::before,#closeInfoOverlay:hover::after{background:#fff}
 
-/* Vertical Tabs */
-#infoVerticalTabs{display:flex;flex-direction:column;width:140px;gap:8px;margin-right:16px;flex-shrink:0}
-#infoVerticalTabs button{padding:12px 8px;border-radius:10px;border:0;background:rgba(38,166,255,0.2);font-weight:700;cursor:pointer;transition:all .3s cubic-bezier(0.4, 0, 0.2, 1);text-align:left;color:#222;position:relative;overflow:hidden}
-#infoVerticalTabs button::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:rgba(255,255,255,0.2);transition:left .3s ease}
+/* Vertical Tabs - Desktop */
+#infoVerticalTabs{display:flex;flex-direction:column;width:145px;gap:8px;margin-right:16px;flex-shrink:0}
+#infoVerticalTabs button{padding:12px 10px;border-radius:10px;border:0;background:rgba(38,166,255,0.12);font-weight:700;cursor:pointer;transition:all .25s;text-align:left;color:var(--fg);position:relative;overflow:hidden}
+#infoVerticalTabs button::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:rgba(255,255,255,0.14);transition:left .28s}
 #infoVerticalTabs button:hover::before{left:0}
-#infoVerticalTabs button.active,#infoVerticalTabs button:hover{background:#26A6FF;color:#fff;transform:translateX(6px);box-shadow:0 4px 12px rgba(38,166,255,0.3)}
-#infoVerticalTabs button.active{animation:tabPulse .6s ease}
-@keyframes tabPulse{0%{transform:translateX(6px) scale(1)}50%{transform:translateX(6px) scale(1.02)}100%{transform:translateX(6px) scale(1)}}
+#infoVerticalTabs button.active,#infoVerticalTabs button:hover{background:var(--accent);color:#fff;transform:translateX(6px);box-shadow:0 6px 18px rgba(38,166,255,0.12)}
 
-/* Content */
-#infoContent{flex:1;display:flex;overflow:hidden;border-left:1px solid rgba(0,0,0,.1);position:relative}
-.tabContent{display:none;flex:1;overflow-y:auto;padding:8px 16px;scrollbar-width:thin;scrollbar-color:#26A6FF rgba(0,0,0,.05);opacity:0;transform:translateX(20px);transition:opacity .4s cubic-bezier(0.4, 0, 0.2, 1),transform .4s cubic-bezier(0.4, 0, 0.2, 1)}
-.tabContent.active{display:block;opacity:1;transform:translateX(0);animation:contentFadeIn .4s ease}
-@keyframes contentFadeIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+/* Mobile Menu Toggle */
+#mobileMenuToggle{display:none;position:absolute;top:12px;left:12px;background:var(--accent);color:#fff;border:0;border-radius:8px;padding:8px 14px;font-weight:700;font-size:.9rem;cursor:pointer;z-index:62;box-shadow:0 4px 12px rgba(0,0,0,.2);transition:transform .2s}
+#mobileMenuToggle:active{transform:scale(0.95)}
+#mobileMenuToggle::after{content:' ☰';margin-left:4px}
+#mobileMenuToggle.open::after{content:' ✕'}
+
+#infoContent{flex:1;display:flex;overflow:hidden;border-left:1px solid rgba(0,0,0,.06);position:relative}
+.tabContent{display:none;flex:1;overflow-y:auto;padding:12px 18px;opacity:0;transform:translateX(18px);transition:opacity .28s,transform .28s}
+.tabContent.active{display:block;opacity:1;transform:translateX(0)}
 .tabContent::-webkit-scrollbar{width:8px}
-.tabContent::-webkit-scrollbar-track{background:rgba(0,0,0,0.05);border-radius:4px}
-.tabContent::-webkit-scrollbar-thumb{background-color:#26A6FF;border-radius:4px;border:2px solid rgba(0,0,0,0);background-clip:padding-box;transition:background-color .2s}
-.tabContent::-webkit-scrollbar-thumb:hover{background-color:#1e6bbf}
-.tabContent::-webkit-scrollbar{opacity:0.4;transition:opacity .25s}
-.tabContent:hover::-webkit-scrollbar{opacity:1}
+.tabContent::-webkit-scrollbar-track{background:rgba(0,0,0,0.04);border-radius:4px}
+.tabContent::-webkit-scrollbar-thumb{background-color:var(--accent);border-radius:4px}
 
-/* --- SETTINGS TOP RIGHT --- */
-#settingsWrapper{position:fixed;top:12px;right:12px;z-index:25;display:flex;flex-direction:column;align-items:flex-end}
-#settingsBtn{font-size:.95rem;cursor:pointer;color:#fff;margin-bottom:6px;background:#26A6FF;border:0;border-radius:8px;padding:6px 12px;transition:.25s}
-#settingsBtn:hover{background:#1e6bbf;transform:scale(1.05)}
-#settingsPanel{display:none;flex-direction:column;background:#f0f0f0;color:#222;border-radius:14px;padding:14px 20px;box-shadow:0 6px 18px rgba(0,0,0,.2);font-size:.9rem;gap:12px;min-width:170px}
+/* --- MOBILE RESPONSIVE INFO PANEL --- */
+@media (max-width: 768px) {
+  #infoOverlayLarge{
+    width:96%;
+    height:85%;
+    padding:16px;
+    flex-direction:column;
+  }
+  
+  #mobileMenuToggle{
+    display:block;
+  }
+  
+  #infoVerticalTabs{
+    position:absolute;
+    top:50px;
+    left:12px;
+    width:auto;
+    min-width:140px;
+    background:var(--panel-bg);
+    border-radius:10px;
+    padding:8px;
+    box-shadow:0 8px 24px rgba(0,0,0,.2);
+    z-index:63;
+    transform:translateX(-200%);
+    transition:transform .3s ease-in-out;
+  }
+  
+  #infoVerticalTabs.mobile-open{
+    transform:translateX(0);
+  }
+  
+  #infoVerticalTabs button{
+    width:100%;
+    transform:translateX(0) !important;
+  }
+  
+  #infoVerticalTabs button.active{
+    transform:translateX(0) !important;
+  }
+  
+  #infoContent{
+    border-left:none;
+    border-top:1px solid rgba(0,0,0,.06);
+    margin-top:0;
+  }
+  
+  .tabContent{
+    padding:8px 12px;
+  }
+  
+  /* Responsive pricing table */
+  #bookings table{
+    font-size:.9rem;
+  }
+  #bookings thead th{
+    padding:12px 12px !important;
+    font-size:.9rem !important;
+  }
+  #bookings tbody td{
+    padding:12px 12px !important;
+    font-size:.88rem !important;
+  }
+  #bookings tbody td:first-child{
+    font-size:.95rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  #infoOverlayLarge{
+    width:98%;
+    height:90%;
+    padding:12px;
+    border-radius:10px;
+  }
+  
+  #closeInfoOverlay{
+    width:28px;
+    height:28px;
+    top:8px;
+    right:8px;
+  }
+  
+  #mobileMenuToggle{
+    top:8px;
+    left:8px;
+    padding:6px 12px;
+    font-size:.85rem;
+  }
+  
+  #infoVerticalTabs{
+    top:45px;
+    left:8px;
+    min-width:120px;
+    padding:6px;
+  }
+  
+  #infoVerticalTabs button{
+    padding:10px 8px;
+    font-size:.9rem;
+  }
+  
+  .qr-box{
+    width:88px;
+    height:88px;
+    bottom:12px;
+    right:12px;
+  }
+}
+
+/* --- SETTINGS (moved to bottom-left) --- */
+#settingsWrapper{position:fixed;bottom:12px;left:12px;z-index:100;display:flex;flex-direction:column;align-items:flex-start}
+#settingsBtn{font-size:.95rem;cursor:pointer;color:#fff;background:var(--accent);border:0;border-radius:10px;padding:8px 12px;box-shadow:0 8px 18px rgba(0,0,0,.18);transition:transform .12s}
+#settingsBtn:hover{transform:scale(1.03)}
+#settingsPanel{display:none;flex-direction:column;background:var(--panel-bg);color:var(--fg);border-radius:12px;padding:14px 18px;box-shadow:0 10px 30px rgba(0,0,0,.18);font-size:.92rem;gap:12px;min-width:200px;margin-bottom:8px}
 .settingItem{display:flex;justify-content:space-between;align-items:center}
-#volumeControl{width:80px}
+#volumeControl{width:92px}
 
 /* --- SWITCH --- */
-.switch{position:relative;display:inline-block;width:50px;height:26px}
+.switch{position:relative;display:inline-block;width:48px;height:26px}
 .switch input{opacity:0;width:0;height:0}
-.slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.15);border-radius:34px;transition:.4s}
-.slider:before{position:absolute;content:"";height:20px;width:20px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.4s}
-input:checked + .slider{background:rgba(38,166,255,.8)}
-input:checked + .slider:before{transform:translateX(24px)}
+.slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.12);border-radius:34px;transition:.28s}
+.slider:before{position:absolute;content:"";height:20px;width:20px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.28s}
+input:checked + .slider{background:rgba(38,166,255,.85)}
+input:checked + .slider:before{transform:translateX(22px)}
 
 /* --- DARK MODE --- */
 body.dark-mode{background:#000;color:#fff}
 body.dark-mode .bar{background:#fff}
 body.dark-mode #videoBuffered{background:#fff}
-body.dark-mode #videoProgress{background:#26A6FF}
-body.dark-mode .qr-box{background:#222;color:#fff}
-body.dark-mode #infoOverlayLarge{background:#222;color:#fff}
-body.dark-mode #settingsPanel{background:#333;color:#fff}
-body.dark-mode #settingsBtn{background:#26A6FF;color:#fff}
-body.dark-mode #buildNo,body.dark-mode #copyright{color:#aaa}
-
-/* --- BAR HOVER IN DARK MODE: INVERT BACKGROUND AND BAR --- */
-body.dark-mode.bar-hovered{background:#fff;color:#222}
-body.dark-mode.bar-hovered .bar{background:#222}
+body.dark-mode #videoProgress{background:var(--accent)}
+body.dark-mode .qr-box{background:#111;color:#fff}
+body.dark-mode #infoOverlayLarge{background:#111;color:#fff}
+body.dark-mode #settingsPanel{background:#111;color:#fff}
+body.dark-mode #infoVerticalTabs{background:#111}
+body.dark-mode #closeInfoOverlay{background:#333}
+body.dark-mode #closeInfoOverlay::before,body.dark-mode #closeInfoOverlay::after{background:#fff}
+body.dark-mode #closeInfoOverlay:hover{background:var(--accent)}
 
 /* --- QR MODAL + OVERLAY --- */
-#qrModalOverlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.25);backdrop-filter:blur(3px);z-index:29;opacity:0;transition:opacity .18s ease}
-#qrModal{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.98);background:#fff;color:#222;padding:18px 22px;border-radius:14px;box-shadow:0 12px 36px rgba(0,0,0,.35);z-index:30;text-align:center;width:300px;font-family:'Segoe UI',sans-serif;opacity:0;transition:opacity .18s ease,transform .18s ease}
+#qrModalOverlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.28);backdrop-filter:blur(3px);z-index:70;opacity:0;transition:opacity .18s}
+#qrModal{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.98);background:var(--panel-bg);color:var(--fg);padding:18px 20px;border-radius:12px;box-shadow:0 12px 36px rgba(0,0,0,.36);z-index:71;text-align:center;width:320px;opacity:0;transition:opacity .18s,transform .18s}
 #qrModal.open{display:block;opacity:1;transform:translate(-50%,-50%) scale(1)}
 #qrModalOverlay.open{display:block;opacity:1}
-
-/* --- Tiny modal buttons --- */
 .modalBtn{padding:8px 14px;border:0;border-radius:10px;font-weight:700;cursor:pointer}
-.modalProceed{background:#26A6FF;color:#fff}
+.modalProceed{background:var(--accent);color:#fff}
 .modalCancel{background:#ddd;color:#222}
 
-/* --- NOTE / FOOTER --- */
-#buildNo{position:fixed;bottom:12px;left:12px;font-size:.85rem;color:#555;z-index:3}
-#copyright{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);font-size:.85rem;color:#555;z-index:3}
+/* --- FOOTER --- */
+#buildNo{position:fixed;top:12px;left:12px;font-size:.85rem;color:#555;z-index:30}
+#copyright{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);font-size:.85rem;color:#555;z-index:30}
 
-/* --- MAP --- */
-.mapWrapper{width:100%;height:250px;margin-top:12px;border-radius:12px;overflow:hidden}
-.mapWrapper iframe{width:100%;height:100%;border:0;transition:filter .3s}
-body.dark-mode .mapWrapper iframe{filter:invert(1) hue-rotate(180deg)}
-
-/* --- SMALL TEXT FOR BOOKINGS --- */
-.bookingsNote{font-size:.8rem;color:#555;margin-top:8px}
+/* small responsive tweaks */
+@media (max-width:520px){
+  #settingsPanel{min-width:170px;padding:12px}
+  #buildNo{font-size:.75rem;top:8px;left:8px}
+  #copyright{font-size:.75rem;bottom:8px}
+}
 </style>
 </head>
 <body>
 
 <!-- LANDING TEXT -->
-<div class="welcome">
-    Welcome to <span style="color:#26A6FF;">theVideopage<sup>TM</sup></span> of "<span class="no-break">Langebaan Nessie</span>"
-</div>
+<div class="welcome" id="welcome">Welcome to <span style="color:var(--accent)">theVideopage<sup>TM</sup></span> of "<span class="no-break">Langebaan Nessie</span>"</div>
 
 <!-- START BAR -->
-<div class="bar" id="startBar"></div>
+<div class="bar" id="startBar" aria-hidden="true"></div>
 
 <!-- PLAY BUTTON -->
-<button id="playButton">Play</button>
+<button id="playButton" aria-label="Play video">Play</button>
 
 <!-- QR TIP (landing) -->
-<div id="qrTip" class="qr-box" title="Scan / Click to open site"></div>
+<div id="qrTip" class="qr-box" role="button" aria-label="Scan QR code or click to open website" tabindex="0" title="Scan / Click to open site"></div>
 
 <!-- VIDEO -->
 <div id="videoContainer">
-    <video id="videoPlayer" loop playsinline preload="metadata" poster="poster.jpg" tabindex="0">
+    <video id="videoPlayer" loop playsinline preload="metadata" poster="poster.jpg" tabindex="0" aria-label="Background video">
         <source src="langebaannessie.mp4" type="video/mp4">
+        Your browser does not support the video tag.
     </video>
-    <div class="grid-overlay"></div>
-    <div id="videoBuffered"></div>
-    <div id="videoProgress"></div>
+    <div class="grid-overlay" aria-hidden="true"></div>
+    <div id="videoBuffered" aria-hidden="true"></div>
+    <div id="videoProgress" aria-hidden="true"></div>
     <div id="qrBtn" class="qr-box disabled" title="Open info">Info</div>
 </div>
 
-<!-- INFO PANEL (REPLACED WITH VERTICAL SLIDERS DESIGN) -->
-<div id="infoOverlayLarge">
+<!-- INFO PANEL -->
+<div id="infoOverlayLarge" role="dialog" aria-modal="true" aria-hidden="true">
     <button id="closeInfoOverlay" aria-label="Close info"></button>
+    
+    <!-- Mobile Menu Toggle -->
+    <button id="mobileMenuToggle" aria-label="Toggle menu" aria-expanded="false">Menu</button>
 
     <!-- Vertical Tabs -->
-    <div id="infoVerticalTabs">
-        <button class="tabBtn active" data-tab="about">About Us</button>
-        <button class="tabBtn" data-tab="bookings">Bookings</button>
-        <button class="tabBtn" data-tab="contact">Contact Us</button>
+    <div id="infoVerticalTabs" role="tablist" aria-orientation="vertical">
+        <button class="tabBtn active" data-tab="about" role="tab" aria-selected="true">About Us</button>
+        <button class="tabBtn" data-tab="bookings" role="tab">Bookings</button>
+        <button class="tabBtn" data-tab="contact" role="tab">Contact Us</button>
     </div>
 
     <!-- Content Area -->
     <div id="infoContent">
-        <div class="tabContent active" id="about" style="display:block;opacity:1;transform:translateX(0)">
-            <h2>About Langebaan Nessie</h2>
-            <p><strong>South Africa, Western Cape, Langebaan, 3 Jutten, 7357</strong></p>
-            <p>
-                "By Langebaan Nessie nooi ons jou om stadiger te leef en die oomblik te geniet. Langebaan Nessie is 'n self catering woonstel binne loopafstand van die see, winkeltjies, koffiewinkels en Spar. Dit is die ideale plek vir gaste wat 'n rustige gemaklike verblyf in die hart van Langebaan soek."
-            </p>
-            <p>
-                "At Langebaan Nessie, we invite you to slow down and enjoy the moment. Langebaan Nessie is a self-catering apartment within walking distance of the sea, shops, coffee cafés, and Spar. It is the ideal place for guests seeking a peaceful, comfortable stay in the heart of Langebaan."
-            </p>
-
-            <!-- LOGO (added, centered, under text) -->
-            <div style="margin-top:16px;text-align:center">
-                <img src="logo.png" alt="Langebaan Nessie Logo" style="max-width:180px;width:100%;height:auto">
+        <div class="tabContent active" id="about" role="tabpanel">
+            <h2 style="margin-bottom:20px;font-size:1.8rem;background:linear-gradient(135deg, var(--accent), var(--accent-dark));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">About Langebaan Nessie</h2>
+            
+            <!-- Description Cards -->
+            <div style="display:grid;gap:16px;margin-bottom:20px">
+                <!-- Afrikaans -->
+                <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 16px rgba(0,0,0,0.06);border-top:3px solid var(--accent);transition:transform .2s,box-shadow .2s" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.12)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 16px rgba(0,0,0,0.06)'">
+                    <p lang="af" style="margin:0;line-height:1.6;color:#444;font-size:.95rem">"By Langebaan Nessie nooi ons jou om stadiger te leef en die oomblik te geniet. Langebaan Nessie is 'n self catering woonstel binne loopafstand van die see, winkeltjies, koffiewinkels en Spar. Dit is die ideale plek vir gaste wat 'n rustige gemaklike verblyf in die hart van Langebaan soek."</p>
+                </div>
+                
+                <!-- English -->
+                <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 16px rgba(0,0,0,0.06);border-top:3px solid var(--accent);transition:transform .2s,box-shadow .2s" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.12)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 16px rgba(0,0,0,0.06)'">
+                    <p lang="en" style="margin:0;line-height:1.6;color:#444;font-size:.95rem">"At Langebaan Nessie, we invite you to slow down and enjoy the moment. Langebaan Nessie is a self-catering apartment within walking distance of the sea, shops, coffee cafés, and Spar. It is the ideal place for guests seeking a peaceful, comfortable stay in the heart of Langebaan."</p>
+                </div>
+            </div>
+            
+            <!-- Logo Section -->
+            <div style="text-align:center;margin-top:28px;padding:24px;background:linear-gradient(135deg, rgba(38,166,255,0.05), rgba(38,166,255,0.01));border-radius:12px">
+                <img src="logo.png" alt="Langebaan Nessie Logo" style="max-width:220px;width:100%;height:auto;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.1))">
             </div>
         </div>
 
-        <div class="tabContent" id="bookings">
+        <div class="tabContent" id="bookings" role="tabpanel">
             <h2>Bookings & Pricing</h2>
-            <p>Contact us directly for bookings.</p>
-            <p>1 Guest, 1 Night — ZAR 889<br>1 Couple, 1 Night (Double Bed) — ZAR 1,369<br>4 Guests, 1 Night (Double Bed & Two Single Beds) — ZAR 1,599</p>
-            <p>Phone: +27 66 469 7838<br>Email: info@langebaannessie.co.za</p>
-            <p class="bookingsNote">(A 60% deposit is payable upfront to secure your booking. Cancellations made less than 3 days before the booking are non-refundable. Check-in: From 14:00 (2:00 PM). Check-out: By 10:00 (10:00 AM) the following day)</p>
+            <p style="margin-bottom:20px">Contact us directly for bookings.</p>
+            
+            <div style="background:linear-gradient(135deg, rgba(38,166,255,0.08), rgba(38,166,255,0.02));border-radius:12px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.06)">
+                <table style="width:100%;border-collapse:collapse">
+                    <thead>
+                        <tr style="background:var(--accent);color:#fff">
+                            <th style="padding:14px 18px;text-align:left;font-weight:700;font-size:.95rem">Price</th>
+                            <th style="padding:14px 18px;text-align:left;font-weight:700;font-size:.95rem">Accommodation</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom:1px solid rgba(0,0,0,0.06);transition:background .2s" onmouseover="this.style.background='rgba(38,166,255,0.06)'" onmouseout="this.style.background='transparent'">
+                            <td style="padding:16px 18px;font-weight:700;font-size:1.05rem;color:var(--accent)">ZAR 889</td>
+                            <td style="padding:16px 18px;font-size:.95rem">1 Guest, 1 Night</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid rgba(0,0,0,0.06);transition:background .2s" onmouseover="this.style.background='rgba(38,166,255,0.06)'" onmouseout="this.style.background='transparent'">
+                            <td style="padding:16px 18px;font-weight:700;font-size:1.05rem;color:var(--accent)">ZAR 1,369</td>
+                            <td style="padding:16px 18px;font-size:.95rem">1 Couple, 1 Night<br><span style="font-size:.85rem;color:#666">(Double Bed)</span></td>
+                        </tr>
+                        <tr style="transition:background .2s" onmouseover="this.style.background='rgba(38,166,255,0.06)'" onmouseout="this.style.background='transparent'">
+                            <td style="padding:16px 18px;font-weight:700;font-size:1.05rem;color:var(--accent)">ZAR 1,599</td>
+                            <td style="padding:16px 18px;font-size:.95rem">4 Guests, 1 Night<br><span style="font-size:.85rem;color:#666">(Double Bed & Two Single Beds)</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div style="margin-top:24px;padding:16px;background:rgba(38,166,255,0.05);border-left:4px solid var(--accent);border-radius:8px">
+                <p style="margin:0 0 8px;font-weight:700;font-size:.95rem">Contact Information</p>
+                <p style="margin:0;font-size:.9rem">Phone: <a href="tel:+27664697838" style="color:var(--accent);text-decoration:none;font-weight:600">+27 66 469 7838</a><br>Email: <a href="mailto:info@langebaannessie.co.za" style="color:var(--accent);text-decoration:none;font-weight:600">info@langebaannessie.co.za</a></p>
+            </div>
+            
+            <p class="bookingsNote" style="font-size:.85rem;color:#666;margin-top:16px;line-height:1.5">(A 60% deposit is payable upfront to secure your booking. Cancellations made less than 3 days before the booking are non-refundable. Check-in: From 14:00. Check-out: By 10:00 the following day.)</p>
         </div>
 
-        <div class="tabContent" id="contact">
-            <h2>Contact Us</h2>
-            <p>Phone: +27 66 469 7838<br>Email: info@langebaannessie.co.za<br>Operating during standard hours. Excluding Sundays and public holidays.</p>
-
-            <!-- MAP MOVED FROM ABOUT US -->
-            <div class="mapWrapper">
-                <iframe 
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3342.827890596172!2d18.033365576403195!3d-33.08731227353564!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1c34aa1d531732c7%3A0xca65cb64ada8f411!2s3%20Jutten%20St%2C%20Langebaan%2C%207357!5e0!3m2!1sen!2sza!4v1767691309825!5m2!1sen!2sza" 
-                    width="400" height="300" style="border:0" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
-                </iframe>
+        <div class="tabContent" id="contact" role="tabpanel">
+            <h2 style="margin-bottom:20px;font-size:1.8rem;background:linear-gradient(135deg, var(--accent), var(--accent-dark));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Contact Us</h2>
+            
+            <!-- Compact Contact Grid -->
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:20px">
+                <!-- Phone -->
+                <div style="background:linear-gradient(135deg, rgba(38,166,255,0.1), rgba(38,166,255,0.05));border-radius:10px;padding:14px 16px;box-shadow:0 3px 12px rgba(0,0,0,0.06);transition:all .2s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 18px rgba(0,0,0,0.12)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 3px 12px rgba(0,0,0,0.06)'">
+                    <div style="font-size:.85rem;color:#666;margin-bottom:6px;font-weight:600">Phone</div>
+                    <a href="tel:+27664697838" style="color:var(--accent);text-decoration:none;font-weight:700;font-size:1rem;display:block" onmouseover="this.style.color='var(--accent-dark)'" onmouseout="this.style.color='var(--accent)'">+27 66 469 7838</a>
+                </div>
+                
+                <!-- Email -->
+                <div style="background:linear-gradient(135deg, rgba(38,166,255,0.1), rgba(38,166,255,0.05));border-radius:10px;padding:14px 16px;box-shadow:0 3px 12px rgba(0,0,0,0.06);transition:all .2s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 18px rgba(0,0,0,0.12)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 3px 12px rgba(0,0,0,0.06)'">
+                    <div style="font-size:.85rem;color:#666;margin-bottom:6px;font-weight:600">Email</div>
+                    <a href="mailto:info@langebaannessie.co.za" style="color:var(--accent);text-decoration:none;font-weight:700;font-size:.92rem;display:block;word-break:break-all" onmouseover="this.style.color='var(--accent-dark)'" onmouseout="this.style.color='var(--accent)'">info@langebaannessie.co.za</a>
+                </div>
+            </div>
+            
+            <!-- Location -->
+            <div style="background:linear-gradient(135deg, rgba(38,166,255,0.08), rgba(38,166,255,0.02));border-radius:10px;padding:14px 16px;margin-bottom:20px;border-left:3px solid var(--accent);box-shadow:0 3px 12px rgba(0,0,0,0.06)">
+                <div style="font-size:.85rem;color:#666;margin-bottom:6px;font-weight:600">Location</div>
+                <p style="margin:0;font-weight:600;font-size:.92rem;line-height:1.4">3 Jutten Street, Langebaan, 7357<br>Western Cape, South Africa</p>
+                <p style="margin:8px 0 0 0;font-size:.85rem;color:#888">Standard hours · Excluding Sundays and public holidays</p>
+            </div>
+            
+            <!-- Map Section -->
+            <div class="mapWrapper" style="border-radius:10px;overflow:hidden;box-shadow:0 6px 20px rgba(0,0,0,.1);border:2px solid rgba(38,166,255,0.2)">
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3342.827890596172!2d18.033365576403195!3d-33.08731227353564!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1c34aa1d531732c7%3A0xca65cb64ada8f411!2s3%20Jutten%20St%2C%20Langebaan%2C%207357!5e0!3m2!1sen!2sza!4v1767691309825!5m2!1sen!2sza" width="100%" height="240" style="border:0" allowfullscreen="" loading="lazy"></iframe>
             </div>
         </div>
     </div>
@@ -216,74 +375,39 @@ body.dark-mode .mapWrapper iframe{filter:invert(1) hue-rotate(180deg)}
 <!-- QR Modal overlay + popup -->
 <div id="qrModalOverlay" aria-hidden="true"></div>
 <div id="qrModal" role="dialog" aria-modal="true" aria-labelledby="qrModalTitle" aria-describedby="qrModalDesc">
-    <p id="qrModalDesc" style="margin:0 0 14px;font-size:.95rem;color:#222">
-        You clicked the QR code!<br>
-        Would you like to visit our main business site?
-    </p>
+    <h2 id="qrModalTitle" style="font-size:1.1rem;margin:0 0 8px">Visit Website</h2>
+    <p id="qrModalDesc" style="margin:0 0 14px;font-size:.95rem;color:var(--fg)">You clicked the QR code!<br>Would you like to visit our main business site?</p>
     <div style="display:flex;justify-content:center;gap:12px">
         <button id="qrProceedBtn" class="modalBtn modalProceed" type="button">Proceed</button>
         <button id="qrCancelBtn" class="modalBtn modalCancel" type="button">Cancel</button>
     </div>
 </div>
 
-<!-- SETTINGS -->
+<!-- SETTINGS (bottom-left) -->
 <div id="settingsWrapper">
-    <button id="settingsBtn">Settings</button>
-    <div id="settingsPanel">
-        <div class="settingItem">
-            <label>Visual Mode</label>
-            <label class="switch">
-                <input type="checkbox" id="visualModeToggle"><span class="slider"></span>
-            </label>
-        </div>
-        <div class="settingItem">
-            <label>Fullscreen</label>
-            <label class="switch">
-                <input type="checkbox" id="fullscreenModeToggle"><span class="slider"></span>
-            </label>
-        </div>
-        <div class="settingItem">
-            <label>Pause Video</label>
-            <label class="switch">
-                <input type="checkbox" id="pauseVideoToggle"><span class="slider"></span>
-            </label>
-        </div>
-        <div class="settingItem">
-            <label>Mute Audio</label>
-            <label class="switch">
-                <input type="checkbox" id="muteAudioToggle"><span class="slider"></span>
-            </label>
-        </div>
-        <div class="settingItem">
-            <label>Volume</label>
-            <input id="volumeControl" type="range" min="0" max="1" step="0.01" value="0.5">
-        </div>
-        <div class="settingItem">
-            <label>Hide UI</label>
-            <label class="switch">
-                <input type="checkbox" id="hideUIToggle"><span class="slider"></span>
-            </label>
-        </div>
-        <div class="settingItem">
-            <label>Reset Landing</label>
-            <label class="switch">
-                <input type="checkbox" id="refreshPageToggle"><span class="slider"></span>
-            </label>
-        </div>
+    <div id="settingsPanel" aria-hidden="true">
+        <div class="settingItem"><label for="visualModeToggle">Visual Mode</label><label class="switch"><input type="checkbox" id="visualModeToggle" aria-label="Toggle dark mode"><span class="slider" aria-hidden="true"></span></label></div>
+        <div class="settingItem"><label for="fullscreenModeToggle">Fullscreen</label><label class="switch"><input type="checkbox" id="fullscreenModeToggle" aria-label="Toggle fullscreen"><span class="slider" aria-hidden="true"></span></label></div>
+        <div class="settingItem"><label for="pauseVideoToggle">Pause Video</label><label class="switch"><input type="checkbox" id="pauseVideoToggle" aria-label="Pause or play video"><span class="slider" aria-hidden="true"></span></label></div>
+        <div class="settingItem"><label for="muteAudioToggle">Mute Audio</label><label class="switch"><input type="checkbox" id="muteAudioToggle" aria-label="Mute or unmute audio"><span class="slider" aria-hidden="true"></span></label></div>
+        <div class="settingItem"><label for="volumeControl">Volume</label><input id="volumeControl" type="range" min="0" max="1" step="0.01" value="0.5" aria-label="Adjust volume"></div>
+        <div class="settingItem"><label for="hideUIToggle">Hide UI</label><label class="switch"><input type="checkbox" id="hideUIToggle" aria-label="Hide user interface"><span class="slider" aria-hidden="true"></span></label></div>
+        <div class="settingItem"><label for="refreshPageToggle">Reset Landing</label><label class="switch"><input type="checkbox" id="refreshPageToggle" aria-label="Reset to landing page"><span class="slider" aria-hidden="true"></span></label></div>
     </div>
+
+    <button id="settingsBtn" aria-expanded="false" aria-controls="settingsPanel" title="Settings">Settings</button>
 </div>
 
 <!-- FOOTER -->
-<div id="buildNo">Build No. 0.1.5</div>
+<div id="buildNo">Build No. 0.2.1</div>
 <div id="copyright">© 2026 · All rights reserved</div>
 
 <!-- QR library -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
-// --- QR CODE (landing) ---
-new QRCode(document.getElementById("qrTip"), { text: "https://solidstate872.github.io/comingsoon/", width:85, height:85 });
-
-// ELEMENTS
+// Wait for DOM to be fully loaded
+document.addEventListener('DOMContentLoaded', function() {
+// ----------------- ELEMENTS -----------------
 const startBar = document.getElementById('startBar');
 const videoContainer = document.getElementById('videoContainer');
 const video = document.getElementById('videoPlayer');
@@ -305,265 +429,256 @@ const volumeControl = document.getElementById('volumeControl');
 const refreshPageToggle = document.getElementById('refreshPageToggle');
 const hideUIToggle = document.getElementById('hideUIToggle');
 const playButton = document.getElementById('playButton');
+const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+const infoVerticalTabs = document.getElementById('infoVerticalTabs');
 
-// QR modal elements
 const qrModal = document.getElementById('qrModal');
 const qrModalOverlay = document.getElementById('qrModalOverlay');
 const qrProceedBtn = document.getElementById('qrProceedBtn');
 const qrCancelBtn = document.getElementById('qrCancelBtn');
 
-// set default volume to 50%
+// set default volume
 video.volume = 0.5;
 volumeControl.value = 0.5;
-let previousVolume = volumeControl.value;
 
-// Disable Info button on landing
+// init QR code for landing tip
+try {
+  if(typeof QRCode !== 'undefined') {
+    new QRCode(qrTip, { text: "https://solidstate872.github.io/comingsoon/", width:85, height:85 });
+  } else {
+    // Fallback: show text if QR library fails
+    qrTip.innerHTML = '<div style="font-size:0.7rem;text-align:center;padding:10px">QR<br>Code</div>';
+  }
+} catch(e) {
+  console.error('QR Code generation failed:', e);
+  qrTip.innerHTML = '<div style="font-size:0.7rem;text-align:center;padding:10px">QR<br>Code</div>';
+}
+
+// disable info on landing until video started
 qrBtn.classList.add('disabled');
 
-// --- START VIDEO FUNCTION (snap start: no fade) ---
+// ----------------- HELPERS -----------------
 function startExperience(){
-    if(videoContainer.style.display !== 'block'){
-        videoContainer.style.display = 'block';
-        video.play().catch(()=>{});
-        // snap: hide welcome immediately (no fade)
-        const welcomeEl = document.querySelector('.welcome');
-        if(welcomeEl) welcomeEl.style.display = 'none';
-        // hide the start bar when video starts (normal behavior)
-        startBar.style.display = 'none';
-        playButton.style.display = 'none';
-        document.getElementById('qrTip').style.display = 'none';
-        qrBtn.classList.remove('disabled');
-    }
+  if(videoContainer.style.display !== 'block'){
+    videoContainer.style.display = 'block';
+    video.play().catch(()=>{});
+    document.getElementById('welcome').style.display = 'none';
+    startBar.style.display = 'none';
+    playButton.style.display = 'none';
+    qrTip.style.display = 'none';
+    qrBtn.classList.remove('disabled');
+  }
 }
 
-// --- START EVENTS ---
+function openInfoPanel(){
+  infoOverlayLarge.style.display = 'flex';
+  setTimeout(()=> infoOverlayLarge.classList.add('open'), 10);
+  if(!document.body.classList.contains('hide-ui')) document.body.classList.add('info-open');
+  infoOverlayLarge.setAttribute('aria-hidden', 'false');
+}
+
+function closeInfoPanel(){
+  infoOverlayLarge.classList.remove('open');
+  infoVerticalTabs.classList.remove('mobile-open');
+  mobileMenuToggle.classList.remove('open');
+  mobileMenuToggle.setAttribute('aria-expanded', 'false');
+  setTimeout(()=>{ 
+    infoOverlayLarge.style.display='none'; 
+    document.body.classList.remove('info-open'); 
+    infoOverlayLarge.setAttribute('aria-hidden','true'); 
+  }, 360);
+}
+
+function openQrModal(){
+  qrModal.classList.add('open'); qrModalOverlay.classList.add('open');
+  qrModal.style.display='block'; qrModalOverlay.style.display='block';
+  qrProceedBtn.focus();
+}
+function closeQrModal(){ 
+  qrModal.classList.remove('open'); 
+  qrModalOverlay.classList.remove('open'); 
+  setTimeout(()=>{ 
+    qrModal.style.display='none'; 
+    qrModalOverlay.style.display='none'; 
+  },180); 
+}
+function closeQrModalImmediate(){ 
+  qrModal.classList.remove('open'); 
+  qrModalOverlay.classList.remove('open'); 
+  qrModal.style.display='none'; 
+  qrModalOverlay.style.display='none'; 
+}
+
+// ----------------- MOBILE MENU TOGGLE -----------------
+mobileMenuToggle.addEventListener('click', (e)=>{
+  e.stopPropagation();
+  const isOpen = infoVerticalTabs.classList.contains('mobile-open');
+  if(isOpen){
+    infoVerticalTabs.classList.remove('mobile-open');
+    mobileMenuToggle.classList.remove('open');
+    mobileMenuToggle.setAttribute('aria-expanded', 'false');
+  } else {
+    infoVerticalTabs.classList.add('mobile-open');
+    mobileMenuToggle.classList.add('open');
+    mobileMenuToggle.setAttribute('aria-expanded', 'true');
+  }
+});
+
+// Close mobile menu when clicking outside
+document.addEventListener('click', (e)=>{
+  if(window.innerWidth <= 768){
+    if(!infoVerticalTabs.contains(e.target) && 
+       !mobileMenuToggle.contains(e.target) &&
+       infoVerticalTabs.classList.contains('mobile-open')){
+      infoVerticalTabs.classList.remove('mobile-open');
+      mobileMenuToggle.classList.remove('open');
+      mobileMenuToggle.setAttribute('aria-expanded', 'false');
+    }
+  }
+});
+
+// Close mobile menu when tab is selected
+infoTabs.forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    // Switch tabs
+    infoTabs.forEach(t=>{ t.classList.remove('active'); t.setAttribute('aria-selected','false'); });
+    tabContents.forEach(c=>{ c.classList.remove('active'); c.style.display='none'; });
+    tab.classList.add('active'); tab.setAttribute('aria-selected','true');
+    const target = document.getElementById(tab.dataset.tab);
+    target.style.display='block'; void target.offsetWidth; target.classList.add('active');
+    
+    // Close mobile menu on mobile
+    if(window.innerWidth <= 768){
+      infoVerticalTabs.classList.remove('mobile-open');
+      mobileMenuToggle.classList.remove('open');
+      mobileMenuToggle.setAttribute('aria-expanded', 'false');
+    }
+  });
+});
+
+// ----------------- EVENTS -----------------
 [startBar, playButton].forEach(el => el.addEventListener('click', startExperience));
 
-// --- BAR HOVER ---
-startBar.addEventListener('mouseenter', ()=>{ document.body.classList.add('bar-hovered'); });
-startBar.addEventListener('mouseleave', ()=>{ document.body.classList.remove('bar-hovered'); });
+// bar hover
+startBar.addEventListener('mouseenter', ()=> document.body.classList.add('bar-hovered'));
+startBar.addEventListener('mouseleave', ()=> document.body.classList.remove('bar-hovered'));
 
-// --- INFO PANEL OPEN/CLOSE ---
-// Only apply blur (info-open) when hide-ui is NOT active.
-// Using original logic but with vertical tabs markup.
-qrBtn.addEventListener('click', ()=>{ 
-    if(!qrBtn.classList.contains('disabled') && qrBtn.style.display !== 'none'){
-        closeQrModalImmediate();
-        infoOverlayLarge.style.display = 'flex';
-        // Trigger animation by adding open class after display is set
-        setTimeout(()=>{
-            infoOverlayLarge.classList.add('open');
-        }, 10);
-        if(!document.body.classList.contains('hide-ui')){
-            document.body.classList.add('info-open');
-        } else {
-            document.body.classList.remove('info-open');
-        }
-    }
-});
-closeInfoOverlay.addEventListener('click', ()=>{ 
-    infoOverlayLarge.classList.remove('open');
-    setTimeout(()=>{
-        infoOverlayLarge.style.display='none';
-        document.body.classList.remove('info-open');
-    }, 400);
-});
-
-// --- TABS ---
-// Works with vertical tabs because they still use class "tabBtn"
-infoTabs.forEach(tab=>{
-    tab.addEventListener('click', ()=>{
-        // Remove active from all tabs and content
-        infoTabs.forEach(t=>t.classList.remove('active'));
-        tabContents.forEach(c=>{
-            c.classList.remove('active');
-            c.style.display='none';
-        });
-        
-        // Add active to clicked tab
-        tab.classList.add('active');
-        
-        // Show new content with animation
-        const targetContent = document.getElementById(tab.dataset.tab);
-        setTimeout(()=>{
-            targetContent.style.display='block';
-            // Force reflow to trigger animation
-            void targetContent.offsetWidth;
-            targetContent.classList.add('active');
-        }, 50);
-    });
-});
-
-// --- SETTINGS PANEL ---
-settingsBtn.addEventListener('click', ()=>{ settingsPanel.style.display = settingsPanel.style.display==='flex' ? 'none' : 'flex'; });
-
-// --- VISUAL MODE ---
-visualModeToggle.addEventListener('change', ()=>{ document.body.classList.toggle('dark-mode'); });
-
-// --- FULLSCREEN ---
-fullscreenModeToggle.addEventListener('change', ()=>{
-    if(fullscreenModeToggle.checked){
-        document.documentElement.requestFullscreen().catch(()=>{});
-    } else {
-        document.exitFullscreen().catch(()=>{});
-    }
-});
-
-// --- PAUSE VIDEO (settings toggle) ---
-pauseVideoToggle.addEventListener('change', ()=>{ 
-    if(pauseVideoToggle.checked){ video.pause(); } else { video.play(); }
-});
-
-// --- MUTE AUDIO ---
-muteAudioToggle.addEventListener('change', ()=>{ video.muted = muteAudioToggle.checked; });
-
-// --- VOLUME ---
-volumeControl.addEventListener('input', ()=>{ video.volume = volumeControl.value; });
-
-// --- VIDEO PROGRESS & BUFFER ---
-video.addEventListener('timeupdate', ()=>{ if(video.duration) videoProgress.style.width = (video.currentTime / video.duration * 100) + '%'; });
-video.addEventListener('progress', ()=>{
-    if(video.buffered.length){
-        const bufferedEnd = video.buffered.end(video.buffered.length - 1);
-        const duration = video.duration || 1;
-        if(duration > 0) videoBuffered.style.width = (bufferedEnd / duration * 100) + '%';
-    }
-});
-
-// --- RESET LANDING ---
-refreshPageToggle.addEventListener('change', ()=>{ if(refreshPageToggle.checked) location.reload(); });
-
-// --- HIDE UI ---
-// Uses body.hide-ui class so CSS can decide whether blur applies.
-// Behavior requested:
-//  - If still on landing (video NOT started): keep the line bar visible even when Hide UI is ON.
-//  - If video has started: do NOT bring back the line bar when toggling Hide UI.
-hideUIToggle.addEventListener('change', ()=>{
-    if(hideUIToggle.checked){
-        document.body.classList.add('hide-ui');
-        // Hide landing elements (but keep welcome text visible)
-        playButton.style.display = 'none';
-        document.getElementById('qrTip').style.display = 'none';
-        // Hide video overlay elements
-        qrBtn.style.display = 'none';
-        infoOverlayLarge.classList.remove('open');
-        setTimeout(()=>{
-            infoOverlayLarge.style.display = 'none';
-        }, 400);
-        qrBtn.classList.add('disabled');
-        // prevent blur
-        document.body.classList.remove('info-open');
-        // close any open modal
-        closeQrModalImmediate();
-
-        // KEY: Only force the start bar visible if the video has NOT started (landing).
-        if(videoContainer.style.display !== 'block'){
-            startBar.style.display = 'block';
-        }
-        // If the video has already started, do NOT change the startBar visibility (leave it hidden).
-
-    } else {
-        // turning Hide UI off
-        document.body.classList.remove('hide-ui');
-
-        // If video has NOT started, restore landing elements (including bar)
-        if(videoContainer.style.display !== 'block'){
-            playButton.style.display = 'block';
-            startBar.style.display = 'block';
-            document.getElementById('qrTip').style.display = 'flex';
-            qrBtn.classList.add('disabled');
-        } else {
-            // If the video has started, do NOT bring back the startBar (respect normal started-state).
-            // Restore overlay QR button if applicable
-            if(videoContainer.style.display === 'block'){
-                qrBtn.style.display = 'flex';
-                qrBtn.classList.remove('disabled');
-                if(infoOverlayLarge.style.display === 'flex'){
-                    infoOverlayLarge.classList.add('open');
-                    document.body.classList.add('info-open');
-                }
-            }
-        }
-    }
-});
-
-// --- QR TIP CLICK => MODAL (landing QR) ---
-qrTip.addEventListener('click', ()=>{
-    if(hideUIToggle.checked) return;
-    infoOverlayLarge.classList.remove('open');
-    setTimeout(()=>{
-        infoOverlayLarge.style.display = 'none';
-        document.body.classList.remove('info-open');
-    }, 400);
-    openQrModal();
-});
-
-// open & close functions for QR modal
-function openQrModal(){
-    qrModal.classList.add('open');
-    qrModalOverlay.classList.add('open');
-    qrModal.style.display = 'block';
-    qrModalOverlay.style.display = 'block';
-    qrProceedBtn.focus();
-}
-
-function closeQrModal(){
-    qrModal.classList.remove('open');
-    qrModalOverlay.classList.remove('open');
-    setTimeout(()=>{
-        qrModal.style.display = 'none';
-        qrModalOverlay.style.display = 'none';
-    }, 180);
-}
-
-function closeQrModalImmediate(){
-    qrModal.classList.remove('open');
-    qrModalOverlay.classList.remove('open');
-    qrModal.style.display = 'none';
-    qrModalOverlay.style.display = 'none';
-}
-
-// modal controls
+// QR tip -> modal
+qrTip.addEventListener('click', ()=>{ if(hideUIToggle.checked) return; openQrModal(); });
+qrTip.addEventListener('keydown', (e)=>{ if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); if(!hideUIToggle.checked) openQrModal(); }});
 qrCancelBtn.addEventListener('click', closeQrModal);
 qrModalOverlay.addEventListener('click', closeQrModal);
-qrProceedBtn.addEventListener('click', ()=>{
-    window.open('https://solidstate872.github.io/comingsoon/', '_blank', 'noopener');
-    closeQrModal();
+qrProceedBtn.addEventListener('click', ()=>{ window.open('https://solidstate872.github.io/comingsoon/','_blank','noopener,noreferrer'); closeQrModal(); });
+
+// info button
+qrBtn.addEventListener('click', ()=>{ if(!qrBtn.classList.contains('disabled')){ closeQrModalImmediate(); openInfoPanel(); }});
+closeInfoOverlay.addEventListener('click', closeInfoPanel);
+
+// settings toggle
+settingsBtn.addEventListener('click', ()=>{
+  const isOpen = settingsPanel.style.display === 'flex';
+  settingsPanel.style.display = isOpen ? 'none' : 'flex';
+  settingsBtn.setAttribute('aria-expanded', String(!isOpen));
 });
 
-// close modal with Escape
-window.addEventListener('keydown', (e)=>{
-    if(e.key === 'Escape'){
-        if(qrModal.style.display === 'block'){ closeQrModal(); }
-        else if(infoOverlayLarge.style.display === 'flex'){ 
-            infoOverlayLarge.classList.remove('open');
-            setTimeout(()=>{
-                infoOverlayLarge.style.display='none';
-                document.body.classList.remove('info-open');
-            }, 400);
-        }
+// auto-close settings when clicking outside
+document.addEventListener('click', (e)=>{
+  if(!settingsPanel.contains(e.target) && !settingsBtn.contains(e.target)){
+    if(settingsPanel.style.display === 'flex'){
+      settingsPanel.style.display = 'none';
+      settingsBtn.setAttribute('aria-expanded', 'false');
     }
+  }
 });
 
-// --- TAP / CLICK TO PAUSE/PLAY (pointer input) ---
-// Toggles playback and keeps Pause toggle in sync.
-function togglePlayPause(){
-    if(video.paused){
-        video.play().catch(()=>{});
-        pauseVideoToggle.checked = false;
+// visual mode
+visualModeToggle.addEventListener('change', ()=> document.body.classList.toggle('dark-mode'));
+
+// fullscreen
+fullscreenModeToggle.addEventListener('change', ()=>{
+  if(fullscreenModeToggle.checked){ 
+    const elem = document.documentElement;
+    if(elem.requestFullscreen) elem.requestFullscreen().catch(()=>{});
+    else if(elem.webkitRequestFullscreen) elem.webkitRequestFullscreen().catch(()=>{});
+    else if(elem.mozRequestFullScreen) elem.mozRequestFullScreen().catch(()=>{});
+    else if(elem.msRequestFullscreen) elem.msRequestFullscreen().catch(()=>{});
+  } else { 
+    if(document.exitFullscreen) document.exitFullscreen().catch(()=>{});
+    else if(document.webkitExitFullscreen) document.webkitExitFullscreen().catch(()=>{});
+    else if(document.mozCancelFullScreen) document.mozCancelFullScreen().catch(()=>{});
+    else if(document.msExitFullscreen) document.msExitFullscreen().catch(()=>{});
+  }
+});
+
+// pause toggle
+pauseVideoToggle.addEventListener('change', ()=>{ if(pauseVideoToggle.checked) video.pause(); else video.play().catch(()=>{}); });
+
+// mute
+muteAudioToggle.addEventListener('change', ()=> video.muted = muteAudioToggle.checked );
+
+// volume
+volumeControl.addEventListener('input', ()=> video.volume = volumeControl.value );
+
+// video progress & buffered
+video.addEventListener('timeupdate', ()=>{ if(video.duration) videoProgress.style.width = (video.currentTime / video.duration * 100) + '%'; });
+video.addEventListener('progress', ()=>{
+  if(video.buffered.length){ 
+    const bufferedEnd = video.buffered.end(video.buffered.length - 1); 
+    const duration = video.duration || 1; 
+    if(duration>0) videoBuffered.style.width = (bufferedEnd / duration * 100) + '%'; 
+  }
+});
+
+// refresh landing
+refreshPageToggle.addEventListener('change', ()=>{ if(refreshPageToggle.checked) location.reload(); });
+
+// hide UI behavior
+hideUIToggle.addEventListener('change', ()=>{
+  if(hideUIToggle.checked){
+    document.body.classList.add('hide-ui');
+    playButton.style.display='none'; qrTip.style.display='none'; qrBtn.style.display='none'; qrBtn.classList.add('disabled');
+    closeQrModalImmediate(); closeInfoPanel();
+    if(videoContainer.style.display !== 'block') startBar.style.display = 'block';
+  } else {
+    document.body.classList.remove('hide-ui');
+    if(videoContainer.style.display !== 'block'){
+      playButton.style.display='block'; startBar.style.display='block'; qrTip.style.display='flex'; qrBtn.classList.add('disabled');
     } else {
-        video.pause();
-        pauseVideoToggle.checked = true;
+      qrBtn.style.display='flex'; qrBtn.classList.remove('disabled');
+      if(infoOverlayLarge.style.display==='flex'){ infoOverlayLarge.classList.add('open'); document.body.classList.add('info-open'); }
     }
-}
-
-// Use pointerup so both touch and mouse work well
-video.addEventListener('pointerup', (e)=>{
-    // only toggle when the video is visible (started)
-    if(videoContainer.style.display === 'block'){
-        togglePlayPause();
-    }
+  }
 });
+
+// QR/modal keyboard handling
+window.addEventListener('keydown', (e)=>{
+  if(e.key === 'Escape'){
+    if(qrModal.style.display === 'block'){ closeQrModal(); }
+    else if(infoOverlayLarge.style.display === 'flex'){ closeInfoPanel(); }
+  }
+});
+
+
+// tap/click to pause/play when video visible
+function togglePlayPause(){ 
+  if(video.paused){ 
+    video.play().catch(()=>{}); 
+    pauseVideoToggle.checked = false; 
+  } else { 
+    video.pause(); 
+    pauseVideoToggle.checked = true; 
+  } 
+}
+video.addEventListener('pointerup', ()=>{ if(videoContainer.style.display === 'block') togglePlayPause(); });
+
+// Video error handling
+video.addEventListener('error', (e)=>{
+  console.error('Video failed to load:', e);
+  alert('Video failed to load. Please refresh the page or check your connection.');
+});
+
+}); // End of DOMContentLoaded
+
 </script>
 </body>
 </html>
