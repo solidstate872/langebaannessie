@@ -1,0 +1,2701 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Langebaan Nessie</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<style>
+:root{--accent:#26A6FF;--bg:#f5f6f8;--fg:#171717;--panel:linear-gradient(180deg,rgba(251,252,253,.82),rgba(243,245,248,.74));--panel2:linear-gradient(180deg,rgba(249,250,252,.58),rgba(241,244,247,.52));--border:rgba(0,0,0,.04);--muted:rgba(0,0,0,.52);--shadow:0 20px 40px rgba(0,0,0,.08);--shadow2:0 12px 26px rgba(0,0,0,.07);--edge:16px;--info-surface-blur:22px;--info-surface-sat:.96;--info-panel-bg:linear-gradient(135deg,rgba(252,253,255,.16),rgba(243,246,249,.08));--info-panel-card-bg:linear-gradient(180deg,rgba(249,250,252,.62),rgba(241,244,247,.56));--info-panel-card-border:rgba(0,0,0,.05);--info-panel-card-shadow:0 12px 24px rgba(0,0,0,.06);--info-heading-weight:600;--info-heading-tracking:-.014em;--info-heading-line:1.24;--info-heading-color:var(--fg);color-scheme:light}
+*{box-sizing:border-box}html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden}body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--fg);transition:background-color .25s,color .25s;letter-spacing:-.01em}button,input{font:inherit}
+body.dark{--bg:#0a0a0a;--fg:#ececec;--panel:linear-gradient(180deg,rgba(22,22,22,.82),rgba(14,14,14,.74));--panel2:linear-gradient(180deg,rgba(22,22,22,.58),rgba(14,14,14,.50));--border:rgba(255,255,255,.05);--muted:rgba(255,255,255,.5);--shadow:0 22px 42px rgba(0,0,0,.28);--shadow2:0 14px 28px rgba(0,0,0,.2);--info-panel-bg:linear-gradient(135deg,rgba(10,10,10,.3),rgba(10,10,10,.12));--info-panel-card-bg:linear-gradient(180deg,rgba(22,22,22,.62),rgba(14,14,14,.56));--info-panel-card-border:rgba(255,255,255,.06);--info-panel-card-shadow:0 12px 24px rgba(0,0,0,.2);--info-heading-color:var(--fg);color-scheme:dark}
+.glass{background:var(--panel);border:1px solid transparent;-webkit-backdrop-filter:blur(14px) saturate(.98);backdrop-filter:blur(14px) saturate(.98);box-shadow:var(--shadow)}.card{background:var(--panel2);border:1px solid transparent;-webkit-backdrop-filter:blur(20px) saturate(.98);backdrop-filter:blur(20px) saturate(.98);box-shadow:var(--shadow2)}.landing{position:absolute;inset:0;cursor:pointer;z-index:3}.landing-above{position:absolute;top:0;left:0;right:0;height:50%;display:flex;align-items:flex-end;justify-content:center;padding-bottom:24px}.landing-below{position:absolute;top:50%;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:24px;padding-left:16px;padding-right:16px;text-align:center}.logo{width:clamp(180px,24vw,280px);height:auto;display:block;opacity:.98;filter:drop-shadow(0 10px 26px rgba(0,0,0,.08))}.copy{max-width:520px;margin:0;font-size:clamp(.9rem,1.8vw,1.18rem);line-height:1.7;font-weight:300}.copy strong{font-weight:500}.hint{margin:8px 0 0;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.bar{position:fixed;top:50%;left:0;width:100%;height:14px;background:#222;transform:translateY(-50%);cursor:pointer;z-index:2;overflow:hidden;transition:background .25s}.progress{font-family:monospace;white-space:pre;font-size:12px;line-height:14px;color:#fff;pointer-events:none;user-select:none;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:1;transition:color .25s}body.dark .bar{background:#fff}body.dark .progress{color:#000}body.hover{background:#000;color:#fff}body.hover .bar{background:#fff}body.hover .progress{color:#000}body.dark.hover{background:#fff;color:#000}body.dark.hover .bar{background:#000}body.dark.hover .progress{color:#fff}
+#infoBtn{position:fixed;right:var(--edge);bottom:var(--edge);width:110px;height:110px;border-radius:18px;display:flex;align-items:center;justify-content:center;z-index:20;transition:background .2s ease,color .2s ease,border-color .2s ease,box-shadow .2s ease}
+#infoBtn{color:var(--fg);cursor:pointer;text-align:center;font-weight:500;z-index:74;user-select:none;-webkit-user-select:none;-ms-user-select:none;-webkit-touch-callout:none}#infoBtn:hover{background:linear-gradient(180deg,rgba(17,17,17,.94),rgba(8,8,8,.9));border-color:rgba(255,255,255,.12);color:#fff;box-shadow:0 18px 36px rgba(0,0,0,.24)}body.dark #infoBtn:hover{background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(244,246,249,.9));border-color:rgba(0,0,0,.08);color:#111;box-shadow:0 18px 36px rgba(0,0,0,.2)}.corner-label{padding:0 12px;line-height:1.1;user-select:none;-webkit-user-select:none;-ms-user-select:none}.corner-label::selection{background:transparent}.corner-label::-moz-selection{background:transparent}#infoBtn.disabled{opacity:.45;pointer-events:none}
+#video{position:fixed;inset:0;display:none;background:#000;overflow:hidden;--video-pan-x:0px;--video-pan-y:0px;--video-scale:1.1;--video-stage-w:100vw;--video-stage-h:100vh}#videoStage{position:absolute;left:50%;top:50%;width:var(--video-stage-w);height:var(--video-stage-h);transform:translate3d(calc(-50% + var(--video-pan-x)),calc(-50% + var(--video-pan-y)),0);transform-origin:center center;transition:transform .22s ease-out;will-change:transform;isolation:isolate}#video.dragging #videoStage{transition:none}#player{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;-webkit-transform:translateZ(0);transform:translateZ(0)}#videoStage .mesh{position:absolute;inset:0;z-index:1;pointer-events:none;background-image:radial-gradient(circle at center,rgba(0,0,0,.36) .48px,transparent .82px),linear-gradient(to bottom,rgba(0,0,0,.18) 1px,transparent 1px),linear-gradient(180deg,rgba(255,255,255,.02),rgba(0,0,0,.05));background-size:3px 3px,100% 4px,100% 100%;background-position:center center,center center,center center;mix-blend-mode:multiply;opacity:.64;-webkit-transform:translateZ(0);transform:translateZ(0);will-change:transform;-webkit-backface-visibility:hidden;backface-visibility:hidden}.buffer,.playhead{position:absolute;left:0;bottom:0;height:4px;transition:width .2s linear}.buffer{background:rgba(255,255,255,.34)}.playhead{background:var(--accent)}.constellation-canvas{position:absolute;inset:0;z-index:2;pointer-events:none;width:100%;height:100%}
+#top{position:fixed;top:var(--edge);right:var(--edge);display:flex;align-items:center;gap:10px;z-index:74}.pill{height:34px;border-radius:12px;transition:background .2s ease,color .2s ease,border-color .2s ease,box-shadow .2s ease}.volume{width:82px;padding:0 10px;display:flex;align-items:center}.range{width:100%;appearance:none;background:transparent;--pct:33%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.16);border-radius:999px}.range::-webkit-slider-runnable-track{height:6px;background:linear-gradient(to right,var(--accent) 0%,var(--accent) var(--pct,50%),rgba(0,0,0,.12) var(--pct,50%),rgba(0,0,0,.12) 100%);border-radius:999px}.range::-webkit-slider-thumb{appearance:none;width:14px;height:14px;margin-top:-4px;border-radius:50%;background:var(--accent);border:none}.plus,.x{width:34px;height:34px;position:relative;cursor:pointer}.plus:before,.plus:after,.x:before,.x:after{content:"";position:absolute;background:var(--fg);transition:background .2s ease}.plus:before{width:2px;height:14px;left:50%;top:50%;transform:translate(-50%,-50%)}.plus:after{width:14px;height:2px;left:50%;top:50%;transform:translate(-50%,-50%)}.x:before{width:2px;height:14px;left:50%;top:50%;transform:translate(-50%,-50%) rotate(45deg)}.x:after{width:2px;height:14px;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-45deg)}#top .glass:hover,#settingsBtn:hover,#closeSettings:hover{background:linear-gradient(180deg,rgba(17,17,17,.94),rgba(8,8,8,.9));color:#fff;border-color:rgba(255,255,255,.12);box-shadow:0 18px 36px rgba(0,0,0,.24)}#settingsBtn:hover .settings-label{color:#fff}#settingsBtn:hover svg{fill:#fff}#top .glass:hover.plus:before,#top .glass:hover.plus:after,#closeSettings:hover.x:before,#closeSettings:hover.x:after{background:#fff}body.dark #top .glass:hover,body.dark #settingsBtn:hover,body.dark #closeSettings:hover{background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(244,246,249,.9));color:#111;border-color:rgba(0,0,0,.08);box-shadow:0 18px 36px rgba(0,0,0,.2)}body.dark #settingsBtn:hover .settings-label{color:#111}body.dark #settingsBtn:hover svg{fill:#111}body.dark #top .glass:hover.plus:before,body.dark #top .glass:hover.plus:after,body.dark #closeSettings:hover.x:before,body.dark #closeSettings:hover.x:after{background:#111}
+#shade{position:fixed;inset:0;background:rgba(0,0,0,.32);backdrop-filter:blur(4px);opacity:0;visibility:hidden;transition:opacity .24s ease,visibility .24s ease;z-index:55}#shade.open{opacity:1;visibility:visible}#menu{position:fixed;top:50%;left:50%;width:min(100% - 32px,720px);transform:translate(calc(-50% + 88px),-50%) scale(.985);opacity:0;visibility:hidden;pointer-events:none;z-index:56;transition:opacity .28s ease,transform .5s cubic-bezier(.22,1,.36,1),visibility .28s ease}#menu.open{opacity:1;visibility:visible;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+.portal-card{position:relative;z-index:12;width:min(100%,720px);padding:28px;border-radius:24px}.brand{margin:0 0 16px;text-align:center;font-family:Georgia,"Times New Roman",serif;font-size:clamp(2.2rem,6vw,4.6rem);font-weight:400;letter-spacing:-.06em}.brand sup{font-size:.22em;position:relative;top:-1.3em}.menu-close{position:absolute;top:18px;right:18px;width:34px;height:34px;border-radius:12px;border:1px solid transparent;background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(243,245,248,.1));backdrop-filter:blur(16px) saturate(.96);box-shadow:0 10px 22px rgba(0,0,0,.06)}body.dark .menu-close{background:linear-gradient(180deg,rgba(24,24,24,.28),rgba(15,15,15,.12));box-shadow:0 12px 24px rgba(0,0,0,.18)}.menu-close:hover{background:linear-gradient(180deg,rgba(17,17,17,.94),rgba(8,8,8,.9));color:#fff;border-color:rgba(255,255,255,.12);box-shadow:0 18px 36px rgba(0,0,0,.24)}.menu-close:hover.x:before,.menu-close:hover.x:after{background:#fff}body.dark .menu-close:hover{background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(244,246,249,.9));color:#111;border-color:rgba(0,0,0,.08);box-shadow:0 18px 36px rgba(0,0,0,.2)}body.dark .menu-close:hover.x:before,body.dark .menu-close:hover.x:after{background:#111}.menu-info-btn{position:absolute;top:18px;left:18px;height:34px;padding:0 12px;border-radius:12px;border:1px solid transparent;background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(243,245,248,.1));backdrop-filter:blur(16px) saturate(.96);box-shadow:0 10px 22px rgba(0,0,0,.06);cursor:pointer;font-size:.85rem;font-weight:500;color:var(--fg)}body.dark .menu-info-btn{background:linear-gradient(180deg,rgba(24,24,24,.28),rgba(15,15,15,.12));box-shadow:0 12px 24px rgba(0,0,0,.18)}.menu-info-btn:hover{background:linear-gradient(180deg,rgba(17,17,17,.94),rgba(8,8,8,.9));color:#fff}body.dark .menu-info-btn:hover{background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(244,246,249,.9));color:#111}.menu-info-section{display:none;margin-top:16px;padding:18px;border-radius:18px;background:linear-gradient(180deg,rgba(255,255,255,.78),rgba(245,247,250,.68));box-shadow:0 10px 24px rgba(0,0,0,.05)}body.dark .menu-info-section{background:linear-gradient(180deg,rgba(22,22,22,.78),rgba(14,14,14,.68));box-shadow:0 12px 24px rgba(0,0,0,.18)}.menu-info-section.open{display:block}.menu-info-section h4{margin:0 0 12px;font-size:1rem;font-weight:600}.menu-info-section p{margin:0 0 16px;font-size:.9rem;line-height:1.6;color:var(--muted)}.menu-info-section .creator-link{display:inline-block;height:34px;padding:0 14px;border-radius:10px;background:var(--accent);color:#fff;text-decoration:none;font-size:.85rem;font-weight:500;line-height:34px}.search-card{border:1px solid transparent;border-radius:18px;padding:18px;background:linear-gradient(180deg,rgba(255,255,255,.78),rgba(245,247,250,.68));box-shadow:0 10px 24px rgba(0,0,0,.05)}body.dark .search-card{background:linear-gradient(180deg,rgba(22,22,22,.78),rgba(14,14,14,.68));box-shadow:0 12px 24px rgba(0,0,0,.18)}.search-head{display:flex;align-items:center;justify-content:flex-start;gap:12px;margin-bottom:10px}.search-card label{display:block;margin:0;font-weight:500}.search-input-wrap{position:relative}.portal-results{display:grid;gap:0;max-height:320px;overflow-y:auto;overflow-x:hidden}.search-card input{width:100%;height:48px;padding:0 14px;border-radius:14px;border:1px solid transparent;background:rgba(255,255,255,.56);color:var(--fg)}body.dark .search-card input{background:rgba(255,255,255,.04)}.search-card p{margin:10px 0 0;color:var(--muted)}.result{position:relative;z-index:3;display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;margin-top:14px;padding:16px 18px;border:1px solid transparent;border-radius:16px;background:linear-gradient(180deg,rgba(255,255,255,.76),rgba(244,246,249,.66));box-shadow:0 10px 22px rgba(0,0,0,.05);min-height:64px;cursor:pointer;text-align:left;color:var(--fg);touch-action:manipulation;-webkit-tap-highlight-color:transparent;appearance:none;-webkit-appearance:none;user-select:none}.result[hidden]{display:none}.result:active{transform:scale(.995)}.result.selected{background:#2aa8ff;color:#fff;box-shadow:0 12px 24px rgba(24,136,223,.32)}.result.selected .portal-result-meta{color:rgba(255,255,255,.78)}.result span:first-child{min-width:0;overflow-wrap:anywhere;word-break:break-word;font-size:.98rem;line-height:1.35}.portal-result-meta{flex-shrink:0;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}body.dark .result{background:linear-gradient(180deg,rgba(22,22,22,.76),rgba(15,15,15,.66));box-shadow:0 12px 24px rgba(0,0,0,.18)}body.dark .result.selected{background:#2aa8ff;color:#fff;box-shadow:0 12px 24px rgba(24,136,223,.32)}body.dark .result.selected .portal-result-meta{color:rgba(255,255,255,.78)}
+#info{position:fixed;inset:0;display:flex;gap:24px;padding:30px;background:linear-gradient(135deg,rgba(252,253,255,.16),rgba(243,246,249,.08));backdrop-filter:blur(22px) saturate(.96);opacity:0;visibility:hidden;pointer-events:none;transform:translateX(100%);transition:transform .82s cubic-bezier(.22,1,.36,1),opacity .32s ease,visibility 0s linear .82s;z-index:35}body.dark #info{background:linear-gradient(135deg,rgba(10,10,10,.3),rgba(10,10,10,.12))}body.info-open #info{opacity:1;visibility:visible;pointer-events:auto;transform:translateX(0);transition:transform .82s cubic-bezier(.22,1,.36,1),opacity .32s ease,visibility 0s linear 0s}#closeInfo{display:none}body.dark #closeInfo{display:none}#mobileMenu{display:none;position:absolute;top:18px;left:18px;height:34px;padding:0 12px;border:1px solid transparent;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(243,245,248,.1));color:var(--fg);backdrop-filter:blur(16px) saturate(.96);box-shadow:0 10px 22px rgba(0,0,0,.06);z-index:4}body.dark #mobileMenu{background:linear-gradient(180deg,rgba(24,24,24,.28),rgba(15,15,15,.12));box-shadow:0 12px 24px rgba(0,0,0,.18)}#tabs{width:174px;display:flex;flex-direction:column;gap:8px;padding-top:44px;flex-shrink:0}#tabs button{position:relative;height:42px;padding:0 14px;border:1px solid transparent;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(243,245,248,.1));color:var(--fg);text-align:left;cursor:pointer;backdrop-filter:blur(16px) saturate(.96);box-shadow:0 10px 22px rgba(0,0,0,.06);transition:background .2s ease,color .2s ease,box-shadow .2s ease}body.dark #tabs button{background:linear-gradient(180deg,rgba(22,22,22,.34),rgba(14,14,14,.18));color:rgba(255,255,255,.78);box-shadow:0 12px 24px rgba(0,0,0,.2)}#tabs button.active{background:#2aa8ff;border-color:transparent;color:#fff;box-shadow:0 12px 24px rgba(24,136,223,.22)}body.dark #tabs button.active{background:#2aa8ff;color:#fff;box-shadow:0 12px 24px rgba(24,136,223,.22)}#content{flex:1;min-width:0;border-left:1px solid rgba(255,255,255,.08);padding:10px 0 0 26px;display:flex;justify-content:center;overflow:hidden}.tab{display:none;width:min(100%,780px);max-height:calc(100vh - 88px);padding:8px 20px 24px 0;overflow:auto;opacity:0;transform:translateX(12px);transition:opacity .28s ease,transform .28s ease}.tab.active{display:block;opacity:1;transform:translateX(0)}.tab::-webkit-scrollbar{width:6px}.tab::-webkit-scrollbar-track{background:transparent}.tab::-webkit-scrollbar-thumb{background-color:rgba(0,0,0,.15);border-radius:3px}body.dark .tab::-webkit-scrollbar-thumb{background-color:rgba(255,255,255,.2)}.tab h2{margin:0 0 22px;font-size:1.56rem;font-weight:400;letter-spacing:-.02em}.tab p{line-height:1.65;font-size:.95rem;color:var(--fg);opacity:.86;font-weight:300}.stack{display:grid;gap:16px;margin-bottom:24px}.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-bottom:20px}#info .card,#info .frame{background:linear-gradient(180deg,rgba(255,255,255,.24),rgba(244,246,249,.14));border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:18px 18px 16px;backdrop-filter:blur(22px) saturate(.94);box-shadow:0 14px 28px rgba(0,0,0,.07)}body.dark #info .card,body.dark #info .frame{background:linear-gradient(180deg,rgba(30,30,30,.3),rgba(18,18,18,.18));border-color:rgba(255,255,255,.04);box-shadow:0 16px 30px rgba(0,0,0,.2)}.frame{text-align:center;padding:28px 18px}.meta{margin-bottom:8px;font-size:.78rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}.contact{display:block;margin-top:6px;color:var(--accent);text-decoration:none;font-weight:500;word-break:break-word}#mapWrap{position:relative;margin-top:14px;margin-bottom:26px;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.06);background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(242,244,247,.1));backdrop-filter:blur(18px) saturate(.95);box-shadow:0 14px 28px rgba(0,0,0,.06)}body.dark #mapWrap{background:linear-gradient(180deg,rgba(24,24,24,.24),rgba(16,16,16,.12));border-color:rgba(255,255,255,.04);box-shadow:0 16px 30px rgba(0,0,0,.18)}#map{width:100%;height:250px;background:linear-gradient(135deg,rgba(38,166,255,.08),rgba(0,0,0,.06))}#mapFallback{display:none;padding:18px;color:var(--muted)}#mapGate{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;padding:16px;background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.1));color:var(--fg);font-size:.78rem;letter-spacing:.04em;text-transform:uppercase;text-align:center;cursor:default;z-index:4;transition:opacity .2s ease}body.dark #mapGate{background:linear-gradient(180deg,rgba(0,0,0,.03),rgba(0,0,0,.14))}#mapGate span{padding:8px 12px;border-radius:999px;border:1px solid transparent;background:rgba(255,255,255,.18);backdrop-filter:blur(14px)}body.dark #mapGate span{background:rgba(0,0,0,.28)}#mapWrap.map-active #mapGate{opacity:0;pointer-events:none}
+#modalShade{position:fixed;inset:0;background:rgba(0,0,0,.32);backdrop-filter:blur(4px);opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s;z-index:55}#modalShade.open{opacity:1;visibility:visible}#modal{position:fixed;top:50%;left:50%;width:min(92vw,340px);padding:24px;border-radius:20px;transform:translate(-50%,-50%) scale(.96);opacity:0;visibility:hidden;transition:opacity .2s,transform .2s,visibility .2s;z-index:56;text-align:center}#modal.open{opacity:1;visibility:visible;transform:translate(-50%,-50%) scale(1)}#modal h2{margin:0 0 8px;font-size:1.1rem}#modal p{margin:0 0 18px;color:var(--muted);line-height:1.5}.actions{display:flex;justify-content:center;gap:10px}.btn{height:34px;padding:0 14px;border-radius:10px;border:1px solid var(--border);cursor:pointer;background:transparent;color:var(--fg)}.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+#settings{position:fixed;left:var(--edge);bottom:var(--edge);display:flex;flex-direction:column;align-items:flex-start;z-index:60}#settingsBtn{height:34px;padding:0 12px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;color:var(--fg)}#settingsBtn svg{width:16px;height:16px;fill:var(--fg);flex-shrink:0}#settingsBtn .settings-label{display:inline-flex;align-items:center;justify-content:center;line-height:1;color:var(--fg);transform:translateY(-.5px)}#panel{min-width:240px;margin-bottom:8px;padding:0;border-radius:18px;opacity:0;max-height:0;overflow:hidden;pointer-events:none;transform:translateY(8px);transition:max-height .3s ease,opacity .25s ease,transform .25s ease}#panel.open{opacity:1;max-height:420px;pointer-events:auto;transform:translateY(0)}#panelHead{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border)}#closeSettings{border-radius:12px;border:1px solid rgba(255,255,255,.26);background:linear-gradient(180deg,rgba(255,255,255,.22),rgba(243,245,248,.1));backdrop-filter:blur(10px) saturate(1.02);box-shadow:0 10px 24px rgba(0,0,0,.08),inset 0 1px 0 rgba(255,255,255,.32)}body.dark #closeSettings{border-color:rgba(255,255,255,.1);background:linear-gradient(180deg,rgba(24,24,24,.3),rgba(15,15,15,.12));box-shadow:0 10px 24px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.04)}#panelTitle{margin:0;font-size:1rem;font-weight:500}#panelList{padding:12px 16px;display:grid;gap:14px}.row{display:flex;justify-content:space-between;align-items:center;gap:16px;min-height:28px}.row label:first-of-type{flex:1;min-width:0}.switch{position:relative;display:inline-block;width:44px;height:24px}.switch input{opacity:0;width:0;height:0}.slider{position:absolute;inset:0;border-radius:999px;background:rgba(0,0,0,.1);border:1px solid var(--border);cursor:pointer;transition:.3s}.slider:before{content:"";position:absolute;left:2px;bottom:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.3s}input:checked + .slider{background:var(--accent);border-color:var(--accent)}input:checked + .slider:before{transform:translateX(20px)}#vol{width:96px;appearance:none;height:6px;border-radius:999px;background:rgba(0,0,0,.08)}#vol::-webkit-slider-runnable-track{height:6px;border-radius:999px;background:rgba(0,0,0,.08)}#vol::-webkit-slider-thumb{appearance:none;width:14px;height:14px;margin-top:-4px;border-radius:50%;background:var(--accent);border:none}
+body.hide-ui #top,body.hide-ui #infoBtn{opacity:0;pointer-events:none}body.hide-ui #settingsBtn{width:34px;padding:0;justify-content:center}body.hide-ui #settingsBtn .settings-label{display:none}body.hide-ui .landing .logo,body.hide-ui .landing .landing-below{opacity:0;pointer-events:none}
+#build{position:fixed;left:var(--edge);top:var(--edge);font-size:.8rem;color:rgba(0,0,0,.3);z-index:80;pointer-events:none}#copy{position:fixed;left:50%;bottom:var(--edge);transform:translateX(-50%);font-size:.8rem;color:rgba(0,0,0,.3);z-index:80;pointer-events:none}body.dark #build,body.dark #copy{color:rgba(255,255,255,.25)}
+body.hover .glass,body.hover #tabs button,body.hover .card,body.hover .frame,body.hover .search-card,body.hover .result,body.hover #mapWrap{background:linear-gradient(180deg,rgba(24,24,24,.92),rgba(15,15,15,.84));color:#fff;border-color:rgba(255,255,255,.1)}body.hover #portalBtn:before,body.hover #portalBtn:after,body.hover .x:before,body.hover .x:after{background:#fff}body.hover #settingsBtn,body.hover #settingsBtn .settings-label{color:#fff}body.hover #settingsBtn svg{fill:#fff}body.hover .portalNote,body.hover .portal-result-meta,body.hover #build,body.hover #copy{color:rgba(255,255,255,.56)}body.dark.hover .glass,body.dark.hover #tabs button,body.dark.hover .card,body.dark.hover .frame,body.dark.hover .search-card,body.dark.hover .result,body.dark.hover #mapWrap{background:linear-gradient(180deg,rgba(255,255,255,.94),rgba(247,248,250,.88));color:#111;border-color:rgba(0,0,0,.08)}body.dark.hover #portalBtn:before,body.dark.hover #portalBtn:after,body.dark.hover .x:before,body.dark.hover .x:after{background:#111}body.dark.hover #settingsBtn,body.dark.hover #settingsBtn .settings-label{color:#111}body.dark.hover #settingsBtn svg{fill:#111}body.dark.hover .portalNote,body.dark.hover .portal-result-meta,body.dark.hover #build,body.dark.hover #copy{color:rgba(0,0,0,.46)}
+#info{background:var(--info-panel-bg);-webkit-backdrop-filter:blur(var(--info-surface-blur)) saturate(var(--info-surface-sat));backdrop-filter:blur(var(--info-surface-blur)) saturate(var(--info-surface-sat))}#info .card,#info .frame{background:var(--info-panel-card-bg);border-color:var(--info-panel-card-border);-webkit-backdrop-filter:blur(var(--info-surface-blur)) saturate(var(--info-surface-sat));backdrop-filter:blur(var(--info-surface-blur)) saturate(var(--info-surface-sat));box-shadow:var(--info-panel-card-shadow)}
+#info .tab h2,#menu .menu-info-section h4{font-weight:var(--info-heading-weight);letter-spacing:var(--info-heading-tracking);line-height:var(--info-heading-line);color:var(--info-heading-color);margin-top:0}
+#info .tab>.info-unified-card{display:block}#info .tab>.info-unified-card>.info-unified-body{display:grid;gap:16px}#info .tab>.info-unified-card .card,#info .tab>.info-unified-card .frame{background:transparent;border-color:transparent;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;padding:0}#info .tab>.info-unified-card .stack,#info .tab>.info-unified-card .grid2{display:grid;gap:16px;grid-template-columns:1fr}
+#info .tab>.info-unified-card>.info-unified-body>.info-section{display:contents}
+@media (max-width:768px){:root{--edge:12px}.logo{width:clamp(150px,44vw,220px)}.copy{font-size:clamp(.88rem,3.3vw,1.04rem);line-height:1.62}#infoBtn{width:88px;height:88px}#video{--video-scale:1.34}#menu{width:min(100% - 24px,720px)}.portal-card{padding:24px 20px;max-height:90vh;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column}.search-card{padding:16px;flex-shrink:0}.search-card input{height:50px;font-size:16px}.result{align-items:flex-start;flex-direction:column;padding:18px 18px 16px;min-height:84px;border-radius:18px}.result span:first-child{font-size:1rem}.portal-result-meta{font-size:.68rem}.menu-info-section{max-height:none;overflow-y:visible;-webkit-overflow-scrolling:touch;flex-shrink:0}#info{padding:18px;gap:0}#mobileMenu{display:block}#tabs{position:absolute;left:18px;top:60px;width:146px;padding:8px;border-radius:16px;background:rgba(255,255,255,.22);box-shadow:var(--shadow);transform:translateX(-180%);transition:transform .24s ease;z-index:3}body.dark #tabs{background:rgba(18,18,18,.32)}#tabs.open{transform:translateX(0)}#content{border-left:none;padding:52px 0 0}.tab{width:100%;max-height:calc(100vh - 88px);padding:0 0 20px}.grid2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="landing" id="landing" role="button" tabindex="0" aria-label="Enter site"><div class="landing-above"><img class="logo" src="logo.png" alt="Langebaan Nessie logo"></div><div class="bar" id="startBar"><div class="progress" id="progress"></div></div><div class="landing-below"><p class="copy"><strong>Welcome to Langebaan Nessie.</strong> A peaceful self-catering stay.</p><p class="hint">Click anywhere to enter</p></div></div>
+<div id="video"><div id="videoStage"><video id="player" loop playsinline preload="auto" poster="poster.jpg"><source src="langebaannessie.mp4" type="video/mp4"></video><div class="mesh"></div><canvas id="constellationCanvas" class="constellation-canvas"></canvas></div><div class="buffer" id="videoBuffered"></div><div class="playhead" id="videoProgress"></div></div>
+<div class="glass" id="infoBtn" role="button" tabindex="0"><div class="corner-label" id="infoLabel">Info</div><div id="infoQr" class="qrSmallCanvas" style="display:none"></div></div>
+<div id="top"><div class="pill glass volume"><input class="range" id="topVol" type="range" min="0" max="1" step="0.01" value="0.33"></div><button class="pill glass plus" id="portalBtn" type="button" aria-expanded="false"></button></div>
+<div class="search-shade" id="shade"></div>
+<div id="menu"><div class="portal-card glass"><button class="glass menu-info-btn" id="menuInfoBtn" type="button">Info</button><button class="glass x menu-close" id="menuClose" type="button" aria-label="Close menu" onclick="event.stopPropagation();document.getElementById('portalBtn').click();"></button><h3 class="brand">Langebaan Nessie</h3><div class="search-card"><div class="search-head"><label for="portalSearch">Looking around</label></div><div class="search-input-wrap"><input id="portalSearch" type="search" placeholder="Search video stories, places, or moments…" autocomplete="off"></div><div class="portal-results" id="portalResults"></div></div><div class="menu-info-section" id="menuInfoSection"><h4>About This Experience</h4><p>This is a space where each video is more than just something to watch; it is a doorway into a moment. As you explore, stories unfold and connect, guiding you through a fluid, evolving experience shaped by movement, curiosity, and discovery. Nothing here is fixed; the world you step into is continuously expanding, still in prototype with new moments and connections added over time. Use the search to navigate, drift between ideas, and uncover what is waiting beneath the surface.</p><a class="creator-link" href="https://about.me/kobusLiebenberg" target="_blank" rel="noopener noreferrer">About the Creator</a></div></div></div>
+<div id="info"><button class="glass x" id="closeInfo" type="button" aria-label="Close info"></button><button class="glass" id="mobileMenu" type="button" aria-expanded="false">Menu</button><div id="tabs"><button class="active" data-tab="about" type="button">About Us</button><button data-tab="bookings" type="button">Bookings</button><button data-tab="contact" type="button">Contact Us</button></div><div id="content"><div class="tab active" id="about"><h2>About Langebaan Nessie</h2><div class="stack"><div class="card"><p lang="af" style="margin:0">"By Langebaan Nessie nooi ons jou om stadiger te leef en die oomblik te geniet. Langebaan Nessie is 'n self catering woonstel binne loopafstand van die see, winkeltjies, koffiewinkels en Spar. Dit is die ideale plek vir gaste wat 'n rustige gemaklike verblyf in die hart van Langebaan soek."</p></div><div class="card"><p lang="en" style="margin:0">"At Langebaan Nessie, we invite you to slow down and enjoy the moment. Langebaan Nessie is a self-catering apartment within walking distance of the sea, shops, coffee cafes, and Spar. It is the ideal place for guests seeking a peaceful, comfortable stay in the heart of Langebaan."</p></div></div><div class="frame card"><img src="logo.png" alt="Langebaan Nessie logo" style="max-width:200px;width:100%;height:auto;opacity:.92"></div></div><div class="tab" id="bookings"><h2>Bookings &amp; Pricing</h2><p style="margin:0 0 24px">Looking forward to having you! Book online. You can also contact us directly.</p><div class="grid2"><div class="card"><div class="meta">Online Bookings</div><a class="contact" href="https://www.lekkeslaap.co.za/accommodation/langebaan-nessie" target="_blank" rel="noopener noreferrer"><img src="lekkeslaap.svg" alt="LekkeSlaap" style="height:32px;width:auto;opacity:.9"></a></div><div class="card"><div class="meta">Contact Information</div><a class="contact" href="tel:+27664697838">+27 66 469 7838</a><a class="contact" href="mailto:info@langebaannessie.co.za">info@langebaannessie.co.za</a></div></div></div><div class="tab" id="contact"><h2>Contact Us</h2><div class="grid2"><div class="card"><div class="meta">Phone</div><a class="contact" href="tel:+27664697838">+27 66 469 7838</a></div><div class="card"><div class="meta">Email</div><a class="contact" href="mailto:info@langebaannessie.co.za">info@langebaannessie.co.za</a></div></div><div class="card"><div class="meta">Location</div><p style="margin:0;font-weight:500;font-size:.92rem;line-height:1.5">3 Jutten Street, Langebaan, 7357<br>Western Cape, South Africa</p><p style="margin:8px 0 0;font-size:.85rem;opacity:.66">Standard hours - Excluding Sundays and public holidays</p><div class="card" id="mapWrap"><div id="map"></div><div id="mapFallback">The map could not be loaded right now.</div><div id="mapGate"><span>Double click to activate map</span></div></div></div></div></div></div>
+<div id="modalShade"></div><div class="glass" id="modal"><h2>Visit Website</h2><p>You clicked the QR code.<br>Would you like to visit our main business site?</p><div class="actions"><button id="modalProceed" class="btn primary" type="button">Proceed</button><button id="modalCancel" class="btn" type="button">Cancel</button></div></div>
+<div id="settings"><div class="glass" id="panel"><div id="panelHead"><h2 id="panelTitle">Control Panel</h2><button class="glass x" id="closeSettings" type="button" aria-label="Close settings"></button></div><div id="panelList"><div class="row"><label for="infoToggle">Video Page Mode</label><label class="switch"><input id="infoToggle" type="checkbox"><span class="slider"></span></label></div><div class="row"><label for="darkToggle">Visual Mode</label><label class="switch"><input id="darkToggle" type="checkbox"><span class="slider"></span></label></div><div class="row"><label for="fullscreenToggle">Fullscreen</label><label class="switch"><input id="fullscreenToggle" type="checkbox"><span class="slider"></span></label></div><div class="row"><label for="videoToggle">Video</label><label class="switch"><input id="videoToggle" type="checkbox"><span class="slider"></span></label></div><div class="row"><label for="volumeToggle">Volume</label><label class="switch"><input id="volumeToggle" type="checkbox"><span class="slider"></span></label></div><div class="row"><label for="qrToggle">QR Code</label><label class="switch"><input id="qrToggle" type="checkbox"><span class="slider"></span></label></div><div class="row"><label for="uiToggle">User Interface</label><label class="switch"><input id="uiToggle" type="checkbox"><span class="slider"></span></label></div><div class="row"><label for="resetToggle">Reset</label><label class="switch"><input id="resetToggle" type="checkbox"><span class="slider"></span></label></div></div></div><button class="glass" id="settingsBtn" type="button" aria-expanded="false"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97 0-.33-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49 1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.33-.07.67-.07 1 0 .33.03.65.07.97l-2.11 1.66c-.19.15-.24.42-.12.64l2 3.46c.12.22.38.31.61.22l2.49-1c.52.39 1.06.73 1.69.98l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.13-.22.07-.49-.12-.64z"/></svg><span class="settings-label">Settings</span></button></div>
+<div class="bg-wrap"><div class="bg" id="bg"></div><div class="grain"></div></div>
+<div class="veil" id="veil"></div>
+<video id="bgVideo" playsinline webkit-playsinline preload="metadata" muted loop></video>
+<footer><div id="build">Build No. 0.4.1b - flight-landing</div><div id="copy">&copy; 2026 · All rights reserved</div>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script>
+/* VIDEO_CONFIG: Single source of truth - maps video ID to source/label/search terms and schema-first tab templates (legacy tab.content fallback supported by renderer) */
+window.VIDEO_CONFIG = {
+  'langebaan-nessie': {
+    id: 'langebaan-nessie',
+    src: 'langebaannessie.mp4',
+    label: 'Langebaan Nessie',
+    tags: ['langebaan', 'nessie', 'accommodation', 'self-catering'],
+    searchTerms: 'langebaan nessie video langebaannessie mp4',
+    tabs: [
+      {
+        id: 'about',
+        label: 'About Us',
+        title: 'About Langebaan Nessie',
+        template: {
+          subtitle: 'Accommodation',
+          sections: [
+            {
+              heading: 'About / Overview',
+              html: '<p lang="af" style="margin:0">"By Langebaan Nessie nooi ons jou om stadiger te leef en die oomblik te geniet. Langebaan Nessie is \'n self catering woonstel binne loopafstand van die see, winkeltjies, koffiewinkels en Spar. Dit is die ideale plek vir gaste wat \'n rustige gemaklike verblyf in die hart van Langebaan soek."</p><p lang="en" style="margin:16px 0 0">"At Langebaan Nessie, we invite you to slow down and enjoy the moment. Langebaan Nessie is a self-catering apartment within walking distance of the sea, shops, coffee cafes, and Spar. It is the ideal place for guests seeking a peaceful, comfortable stay in the heart of Langebaan."</p>'
+            },
+            {
+              heading: 'Credits / Production Info',
+              html: '<img src="logo.png" alt="Langebaan Nessie logo" style="max-width:200px;width:100%;height:auto;opacity:.92">'
+            }
+          ]
+        }
+      },
+      {
+        id: 'bookings',
+        label: 'Bookings',
+        title: 'Bookings &amp; Pricing',
+        template: {
+          subtitle: 'Menus / Downloads',
+          description: 'Looking forward to having you! Book online. You can also contact us directly.',
+          sections: [
+            {
+              heading: 'Menus / Downloads',
+              html: '<img src="lekkeslaap.svg" alt="LekkeSlaap" style="height:32px;width:auto;opacity:.9">',
+              links: [
+                { label: 'Online Bookings', url: 'https://www.lekkeslaap.co.za/accommodation/langebaan-nessie', newTab: true }
+              ]
+            },
+            {
+              heading: 'Contact Info',
+              links: [
+                { label: '+27 66 469 7838', url: 'tel:+27664697838', newTab: false },
+                { label: 'info@langebaannessie.co.za', url: 'mailto:info@langebaannessie.co.za', newTab: false }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        id: 'contact',
+        label: 'Contact Us',
+        title: 'Contact Us',
+        template: {
+          subtitle: 'Contact Info',
+          sections: [
+            {
+              heading: 'Contact Info',
+              links: [
+                { label: '+27 66 469 7838', url: 'tel:+27664697838', newTab: false },
+                { label: 'info@langebaannessie.co.za', url: 'mailto:info@langebaannessie.co.za', newTab: false }
+              ]
+            },
+            {
+              heading: 'About / Overview',
+              html: '<p style="margin:0;font-weight:500;font-size:.92rem;line-height:1.5">3 Jutten Street, Langebaan, 7357<br>Western Cape, South Africa</p><p style="margin:8px 0 0;font-size:.85rem;opacity:.66">Standard hours - Excluding Sundays and public holidays</p><div id="mapWrap"><div id="map"></div><div id="mapFallback">The map could not be loaded right now.</div><div id="mapGate"><span>Double click to activate map</span></div></div>'
+            }
+          ]
+        },
+        map: { lat: -33.08729853417471, lng: 18.03594154624622, popup: '<strong>Langebaan Nessie</strong><br>3 Jutten Street, Langebaan' }
+      }
+    ]
+  },
+  'family': {
+    id: 'family',
+    src: 'video_001.mp4',
+    label: 'Family',
+    tags: ['family', 'private', 'personal'],
+    private: true,
+    password: '0000',
+    searchTerms: 'family video video_001',
+    tabs: [
+      {
+        id: 'overview',
+        label: 'Overview',
+        title: 'Family Video',
+        template: {
+          subtitle: 'Overview',
+          sections: [
+            {
+              heading: 'About / Overview',
+              content: 'Family moments and memories. This video showcases the warmth and comfort of a family stay.'
+            }
+          ]
+        }
+      }
+    ]
+  },
+  'marcs-beach-bar': {
+    id: 'marcs-beach-bar',
+    src: 'video_002.mp4',
+    label: "Marc's Beach Bar",
+    tags: ['restaurant', 'bar', 'langebaan', 'beachfront'],
+    private: true,
+    password: '0000',
+    searchTerms: "marcs beach bar langebaan restaurant video_002",
+    tabs: [
+      {
+        id: 'about',
+        label: 'About Us',
+        title: "About Marc's Beach Bar",
+        template: {
+          subtitle: 'Restaurant',
+          description: [
+            "Marc's Beach Bar Restaurant is one of Langebaan's landmarks not to be missed. With probably the best views in Langebaan our vibey bar and restaurant is a West Coast hotspot!"
+          ],
+          sections: [
+            {
+              heading: 'About / Overview',
+              content: [
+                'Right on the beachfront of the Langebaan Lagoon with open air tables, it is the perfect spot to enjoy a sundowner or to just soak up the warm west coast sun - the perfect place to start or finish a pub crawling adventure trip.',
+                "Watch the kite surfers' strut their stuff or the yachts enter and exit the harbour. Proudly South African, we host a variety of talented South African artists on a weekly basis."
+              ]
+            },
+            {
+              heading: 'Credits / Production Info',
+              html: '<img src="https://marcsbeachbar.com/gooimielies/2019/11/download-1.png" alt="Marc\'s Beach Bar logo" style="max-width:200px;width:100%;height:auto;opacity:.92">'
+            }
+          ],
+          links: [
+            { label: 'Visit Website', url: 'https://marcsbeachbar.com', newTab: true }
+          ]
+        }
+      },
+      {
+        id: 'menus',
+        label: 'Download Menus',
+        title: 'Download Menus',
+        template: {
+          subtitle: 'Menus / Downloads',
+          description: 'View our latest menus below.',
+          sections: [
+            {
+              heading: 'Menus / Downloads',
+              links: [
+                { label: 'Download Food Menu', url: 'https://marcsbeachbar.com/gooimielies/2023/04/Food-menu-February-2026.pdf', newTab: true },
+                { label: 'Download Drink Menu', url: 'https://marcsbeachbar.com/gooimielies/2023/04/Liquor-menus-december-2025.pdf', newTab: true }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        id: 'contact',
+        label: 'Contact Us',
+        title: 'Contact Us',
+        template: {
+          subtitle: 'Contact Info',
+          sections: [
+            {
+              heading: 'Contact Info',
+              content: [
+                "Location: Marc's Beach Bar, HOBIE BEACH, LANGEBAAN",
+                'Phone: +27 22 634 0407'
+              ]
+            },
+            {
+              heading: 'Credits / Production Info',
+              html: '<img src="https://marcsbeachbar.com/gooimielies/2019/11/download-1.png" alt="Marc\'s Beach Bar logo" style="max-width:200px;width:100%;height:auto;opacity:.92">'
+            }
+          ],
+          links: [
+            { label: 'marcsbeachbar.com', url: 'https://marcsbeachbar.com', newTab: true },
+            { label: '+27 22 634 0407', url: 'tel:+27226340407', newTab: false }
+          ]
+        }
+      }
+    ]
+  },
+  'mykonos-car-wash': {
+    id: 'mykonos-car-wash',
+    src: 'video_003.mp4',
+    label: 'Mykonos Car Wash',
+    tags: ['car wash', 'cleaning', 'detailing', 'mykonos'],
+    private: true,
+    password: '0000',
+    searchTerms: 'mykonos car wash langebaan cleaning detailing video_003',
+    tabs: [
+      {
+        id: 'about',
+        label: 'About Us',
+        title: 'About Mykonos Car Wash',
+        template: {
+          subtitle: 'About / Overview',
+          sections: [
+            {
+              heading: 'About / Overview',
+              content: 'Mykonos Car Wash provides three services: exterior cleaning, interior cleaning, and detailing. Our services are renowned in the Langebaan Lagoon. Attention to detail and superior cleaning results keep our customers coming back.'
+            },
+            {
+              heading: 'Credits / Production Info',
+              html: '<img src="https://tse4.mm.bing.net/th/id/OIP.4KqmTbXSxpoAG5RUE9O-1wHaHa?rs=1&pid=ImgDetMain&o=7&rm=3" alt="Mykonos Car Wash logo" style="max-width:200px;width:100%;height:auto;opacity:.92">'
+            }
+          ]
+        }
+      },
+      {
+        id: 'contact',
+        label: 'Contact Us',
+        title: 'Contact Us',
+        template: {
+          subtitle: 'Contact Info',
+          sections: [
+            {
+              heading: 'Contact Info',
+              content: 'Location: Club Mykonos Resort, Langebaan, South Africa, 7357',
+              links: [
+                { label: '+27 82 821 5458', url: 'tel:+27828215458', newTab: false }
+              ]
+            },
+            {
+              heading: 'Credits / Production Info',
+              html: '<img src="https://tse4.mm.bing.net/th/id/OIP.4KqmTbXSxpoAG5RUE9O-1wHaHa?rs=1&pid=ImgDetMain&o=7&rm=3" alt="Mykonos Car Wash logo" style="max-width:200px;width:100%;height:auto;opacity:.92">'
+            }
+          ]
+        }
+      }
+    ]
+  },
+  'nike-africa': {
+    id: 'nike-africa',
+    src: 'video_004.mp4',
+    label: 'Nike Africa – Spec Commercial',
+    tags: ['nike', 'africa', 'commercial', 'spec', 'production'],
+    private: true,
+    password: '0000',
+    searchTerms: 'nike africa spec commercial fly on the wall productions kobus liebenberg video-004',
+    tabs: [
+      {
+        id: 'overview',
+        label: 'Overview',
+        title: 'Nike Africa – Spec Commercial',
+        title: 'Nike Africa \u2013 Spec Commercial',
+        template: {
+          subtitle: 'Commercial',
+          sections: [
+            {
+              heading: 'About / Overview',
+              content: [
+                'This is a spec commercial for Nike Africa, produced by Fly on the Wall Production.',
+                "This project marks my first in-house editing work with the company, and it's been an incredible experience from start to finish. I had the opportunity to collaborate alongside some of the most talented creatives and inspiring minds in the industry, which made this project even more special.",
+                'I also had the privilege of completing the online edit at Waterfront Studios — a truly rewarding experience that helped bring this vision to life.',
+                'Grateful for the journey, the team, and the growth that came with it.'
+              ]
+            }
+          ]
+        }
+      },
+      {
+        id: 'about',
+        label: 'About',
+        title: 'About',
+        template: {
+          subtitle: 'Credits / Production Info',
+          sections: [
+            {
+              heading: 'Credits / Production Info',
+              html: '<p style="margin:0"><strong>Video Editor:</strong> Kobus Liebenberg</p><p style="margin:16px 0 0">Nike Africa — in collaboration with Fly on the Wall Productions.</p>'
+            }
+          ]
+        }
+      }
+    ]
+  },
+  'coming-soon-01': {
+    id: 'coming-soon-01',
+    src: null,
+    label: 'Coming Soon',
+    private: true,
+    password: '0000',
+    searchTerms: 'coming soon placeholder future',
+    isPlaceholder: true,
+    tabs: [
+      {
+        id: 'overview',
+        label: 'Overview',
+        title: 'Coming Soon',
+        template: {
+          subtitle: 'Overview',
+          sections: [
+            {
+              heading: 'About / Overview',
+              content: 'This section is reserved for future content. A new story and experience will be available here soon.'
+            }
+          ]
+        }
+      }
+    ]
+  },
+  'coming-soon-02': {
+    id: 'coming-soon-02',
+    src: null,
+    label: 'Coming Soon',
+    private: true,
+    password: '0000',
+    searchTerms: 'coming soon placeholder future',
+    isPlaceholder: true,
+    tabs: [
+      {
+        id: 'overview',
+        label: 'Overview',
+        title: 'Coming Soon',
+        template: {
+          subtitle: 'Overview',
+          sections: [
+            {
+              heading: 'About / Overview',
+              content: 'This section is reserved for future content. A new story and experience will be available here soon.'
+            }
+          ]
+        }
+      }
+    ]
+  },
+  'coming-soon-03': {
+    id: 'coming-soon-03',
+    src: null,
+    label: 'Coming Soon',
+    private: true,
+    password: '0000',
+    searchTerms: 'coming soon placeholder future',
+    isPlaceholder: true,
+    tabs: [
+      {
+        id: 'overview',
+        label: 'Overview',
+        title: 'Coming Soon',
+        template: {
+          subtitle: 'Overview',
+          sections: [
+            {
+              heading: 'About / Overview',
+              content: 'This section is reserved for future content. A new story and experience will be available here soon.'
+            }
+          ]
+        }
+      }
+    ]
+  }
+};
+window.DEFAULT_VIDEO_ID = 'langebaan-nessie';
+window.currentVideoId = window.DEFAULT_VIDEO_ID;
+/* Search-only filter: hides all results when query is empty, shows only matches otherwise */
+window._portalFilterResults = function(queryStr) {
+  var query = String(queryStr || '').trim().toLowerCase();
+  var results = Array.from(document.querySelectorAll('#menu .result'));
+  results.forEach(function(result) {
+    if (!query) { result.hidden = true; return; }
+    var haystack = String(result.getAttribute('data-search') || result.textContent || '').toLowerCase();
+    result.hidden = haystack.indexOf(query) === -1;
+  });
+};
+/* Private video access state: tracks which private videos have been unlocked this session.
+   Each video requires its own password entry; unlock resets when switching videos. */
+window._unlockedPrivateVideos = {};
+window._currentUnlockedVideoId = null;
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var portalResults = document.getElementById('portalResults');
+  var portalSearchEl = document.getElementById('portalSearch');
+  if (portalResults && window.VIDEO_CONFIG) {
+    Object.keys(window.VIDEO_CONFIG).forEach(function (videoId) {
+      var cfg = window.VIDEO_CONFIG[videoId];
+      if (!cfg.label) return;
+      var btn = document.createElement('button');
+      btn.className = 'result';
+      btn.type = 'button';
+      btn.dataset.videoId = videoId;
+      var tagsStr = (cfg.tags || []).join(' ');
+      btn.dataset.search = (cfg.searchTerms || (cfg.label + ' ' + (cfg.src || ''))) + ' ' + tagsStr;
+      btn.innerHTML = '<span>' + cfg.label + '</span><span class="portal-result-meta">video</span>';
+      btn.hidden = true;
+      portalResults.appendChild(btn);
+    });
+    if (portalSearchEl) {
+      window._portalFilterResults('Langebaan Nessie');
+    }
+  }
+
+  const b = document.body;
+  const landing = document.getElementById('landing');
+  const startBar = document.getElementById('startBar');
+  const progress = document.getElementById('progress');
+  const videoWrap = document.getElementById('video');
+  const video = document.getElementById('player');
+  const buf = document.getElementById('videoBuffered');
+  const head = document.getElementById('videoProgress');
+  const infoBtn = document.getElementById('infoBtn');
+  const infoLabel = document.getElementById('infoLabel');
+  const infoQr = document.getElementById('infoQr');
+  const topVol = document.getElementById('topVol');
+  const portalBtn = document.getElementById('portalBtn');
+  const shade = document.getElementById('shade');
+  const menu = document.getElementById('menu');
+  const portalSearch = document.getElementById('portalSearch');
+  const closeInfo = document.getElementById('closeInfo');
+  const mobileMenu = document.getElementById('mobileMenu');
+  const tabsWrap = document.getElementById('tabs');
+  const contentWrap = document.getElementById('content');
+  function getTabButtons() { return tabsWrap ? Array.from(tabsWrap.querySelectorAll('button[data-tab]')) : []; }
+  function getTabPanes() { return contentWrap ? Array.from(contentWrap.querySelectorAll('.tab')) : []; }
+  function getTabOrder() { return getTabButtons().map(function (btn) { return btn.dataset.tab; }); }
+  const modalShade = document.getElementById('modalShade');
+  const modal = document.getElementById('modal');
+  const modalProceed = document.getElementById('modalProceed');
+  const modalCancel = document.getElementById('modalCancel');
+  const topControls = document.getElementById('top');
+  const infoPanel = document.getElementById('info');
+  const settingsBtn = document.getElementById('settingsBtn');
+  const panel = document.getElementById('panel');
+  const closeSettings = document.getElementById('closeSettings');
+  const darkToggle = document.getElementById('darkToggle');
+  const fullscreenToggle = document.getElementById('fullscreenToggle');
+  const videoToggle = document.getElementById('videoToggle');
+  const volumeToggle = document.getElementById('volumeToggle');
+  const qrToggle = document.getElementById('qrToggle');
+  const infoToggle = document.getElementById('infoToggle');
+  const uiToggle = document.getElementById('uiToggle');
+  const resetToggle = document.getElementById('resetToggle');
+  const mapWrap = document.getElementById('mapWrap');
+  const mapEl = document.getElementById('map');
+  const mapFallback = document.getElementById('mapFallback');
+  const menuInfoBtn = document.getElementById('menuInfoBtn');
+  const menuInfoSection = document.getElementById('menuInfoSection');
+
+  window.isInfoEnabled = true;
+
+  function isInfoEnabled() {
+    return window.isInfoEnabled !== false;
+  }
+
+  function focusPortalSearchInput(inputEl, menuEl) {
+    if (!inputEl) return;
+
+    var attempts = 0;
+    var maxAttempts = 8;
+
+    function placeCursorAtEnd() {
+      try {
+        var end = inputEl.value ? inputEl.value.length : 0;
+        if (typeof inputEl.setSelectionRange === 'function') {
+          inputEl.setSelectionRange(end, end);
+        }
+      } catch (err) {}
+    }
+
+    function tryFocus() {
+      attempts += 1;
+
+      if (menuEl && !menuEl.classList.contains('open') && attempts < maxAttempts) {
+        requestAnimationFrame(tryFocus);
+        return;
+      }
+
+      try {
+        inputEl.focus({ preventScroll: true });
+      } catch (err) {
+        inputEl.focus();
+      }
+
+      if (document.activeElement === inputEl) {
+        placeCursorAtEnd();
+        return;
+      }
+
+      if (attempts < maxAttempts) {
+        setTimeout(tryFocus, 40);
+      }
+    }
+
+    requestAnimationFrame(function () {
+      requestAnimationFrame(tryFocus);
+    });
+  }
+  window.focusPortalSearchInput = focusPortalSearchInput;
+
+  function setInfoSystemEnabled(enabled) {
+    window.isInfoEnabled = enabled !== false;
+    window.isVideoPageMode = !window.isInfoEnabled;
+    if (infoToggle) infoToggle.checked = !window.isInfoEnabled;
+
+    var menuInfoBtn = document.getElementById('menuInfoBtn');
+    var menuInfoSection = document.getElementById('menuInfoSection');
+    if (menuInfoSection && !window.isInfoEnabled) menuInfoSection.classList.remove('open');
+    if (menuInfoBtn && !window.isInfoEnabled) menuInfoBtn.textContent = 'Info';
+
+    if (!window.isInfoEnabled) {
+      b.classList.remove('info-open');
+      if (tabsWrap) tabsWrap.classList.remove('open');
+      if (mobileMenu) {
+        mobileMenu.classList.remove('open');
+        mobileMenu.setAttribute('aria-expanded', 'false');
+      }
+      setMapActive(false);
+      resetEdgeIntent();
+    }
+
+    updateInfoBtn();
+    if (typeof window.syncInfoButtonForVideo === 'function') {
+      window.syncInfoButtonForVideo();
+    }
+  }
+
+  window.setInfoSystemEnabled = setInfoSystemEnabled;
+
+  function getMapConfigForTab(tabId) {
+    const cfg = window.VIDEO_CONFIG && window.VIDEO_CONFIG[window.currentVideoId];
+    if (!cfg || !cfg.tabs) return null;
+    const tab = cfg.tabs.find(function (t) { return t.id === tabId; });
+    return tab && tab.map ? tab.map : null;
+  }
+
+  function destroyMap() {
+    if (map) {
+      map.remove();
+      map = null;
+      lightLayer = null;
+      darkLayer = null;
+    }
+  }
+  const landingT = 50;
+  let i = 0;
+  let timer = null;
+  let map = null;
+  let lightLayer = null;
+  let darkLayer = null;
+  let mapActive = false;
+  let infoHeadingUid = 0;
+  let tx = 0;
+  let ty = 0;
+  let tracking = false;
+  let sceneLock = false;
+  let edgeIntent = 0;
+  let edgeIntentTimer = null;
+  let tabSwitchLock = false;
+  let lastAudibleVolume = 0.33;
+
+  function fill(r) {
+    if (!r) return;
+    const min = parseFloat(r.min || 0);
+    const max = parseFloat(r.max || 1);
+    const val = parseFloat(r.value || 0);
+    const pct = max !== min ? ((val - min) / (max - min)) * 100 : 0;
+    r.style.setProperty('--pct', pct.toFixed(2) + '%');
+  }
+
+  function render() {
+    if (!progress) return;
+    progress.textContent = '-' + ' '.repeat(Math.max(0, landingT - i)) + '\u2014'.repeat(Math.max(0, i)) + '-';
+  }
+
+  function stopProgress() {
+    if (timer) {
+      clearInterval(timer);
+      timer = null;
+    }
+    if (progress) progress.style.display = 'none';
+  }
+
+  function startProgress() {
+    stopProgress();
+    i = 0;
+    if (progress) progress.style.display = 'block';
+    render();
+    timer = setInterval(function () {
+      if (i < landingT) {
+        i += 1;
+        render();
+      } else {
+        clearInterval(timer);
+        timer = null;
+      }
+    }, 60);
+  }
+
+  function closeMenu() {
+    if (shade) shade.classList.remove('open');
+    if (menu) menu.classList.remove('open');
+    if (portalBtn) portalBtn.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+    resetMenuInfoSection();
+    if (typeof resetMenuSelection === 'function') resetMenuSelection();
+    // Always resume video when modal closes (modal acts as playback controller)
+    if (video && videoWrap && videoWrap.style.display === 'block') {
+      video.play().catch(function() {});
+    }
+  }
+
+  function prepareDefaultBackgroundFrame() {
+    var defaultId = window.DEFAULT_VIDEO_ID || 'langebaan-nessie';
+    var cfg = typeof window.getVideoConfigById === 'function'
+      ? window.getVideoConfigById(defaultId)
+      : (window.VIDEO_CONFIG && window.VIDEO_CONFIG[defaultId]);
+    var sourceNode = video ? video.querySelector('source') : null;
+    if (!video || !sourceNode || !videoWrap || !cfg || !cfg.src) return;
+
+    window.currentVideoId = defaultId;
+    window._videoSelectionPlaybackReady = false;
+
+    var isSameSource = sourceNode.getAttribute('src') === cfg.src;
+    if (!isSameSource) {
+      sourceNode.setAttribute('src', cfg.src);
+      video.load();
+      if (head) head.style.width = '0%';
+      if (buf) buf.style.width = '0%';
+    }
+
+    try {
+      video.currentTime = 0;
+    } catch (err) {}
+    video.pause();
+    if (videoToggle) videoToggle.checked = false;
+    if (typeof window.renderInfoPanelForVideo === 'function') {
+      window.renderInfoPanelForVideo(defaultId);
+    }
+    updateInfoBtn();
+  }
+
+  function openMenu() {
+    if (uiToggle && uiToggle.checked) {
+      uiToggle.checked = false;
+      showUI();
+    }
+    if (landing && videoWrap && landing.style.display !== 'none' && videoWrap.style.display !== 'block') {
+      landing.style.display = 'none';
+      videoWrap.style.display = 'block';
+      prepareDefaultBackgroundFrame();
+    }
+    // Always pause video when modal opens (modal acts as playback controller)
+    if (video && !video.paused) {
+      video.pause();
+    }
+    if (shade) shade.classList.add('open');
+    if (menu) menu.classList.add('open');
+    if (portalBtn) portalBtn.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+    focusPortalSearchInput(portalSearch, menu);
+  }
+
+  function closeModal() {
+    if (modalShade) modalShade.classList.remove('open');
+    if (modal) modal.classList.remove('open');
+  }
+
+  function openModal() {
+    if (modalShade) modalShade.classList.add('open');
+    if (modal) modal.classList.add('open');
+  }
+
+  function closeSettingsPanel() {
+    if (panel) panel.classList.remove('open');
+    if (settingsBtn) settingsBtn.setAttribute('aria-expanded', 'false');
+  }
+
+  function activeTab() {
+    return document.querySelector('.tab.active');
+  }
+
+  function activeTabIndex() {
+    const pane = activeTab();
+    return pane ? getTabOrder().indexOf(pane.id) : 0;
+  }
+
+  function resetEdgeIntent() {
+    edgeIntent = 0;
+    if (edgeIntentTimer) {
+      clearTimeout(edgeIntentTimer);
+      edgeIntentTimer = null;
+    }
+  }
+
+  function lockScene(ms) {
+    sceneLock = true;
+    setTimeout(function () { sceneLock = false; }, ms);
+  }
+
+  function applyTheme() {
+    if (!map || !lightLayer || !darkLayer) return;
+    if (b.classList.contains('dark')) {
+      if (map.hasLayer(lightLayer)) map.removeLayer(lightLayer);
+      if (!map.hasLayer(darkLayer)) darkLayer.addTo(map);
+    } else {
+      if (map.hasLayer(darkLayer)) map.removeLayer(darkLayer);
+      if (!map.hasLayer(lightLayer)) lightLayer.addTo(map);
+    }
+  }
+
+  function ensureMap(mapConfig) {
+    var currentMapEl = document.getElementById('map');
+    var currentMapFallback = document.getElementById('mapFallback');
+    if (!currentMapEl || typeof L === 'undefined') {
+      if (currentMapFallback) currentMapFallback.style.display = 'block';
+      return;
+    }
+    if (!mapConfig) return;
+    if (!map) {
+      map = L.map(currentMapEl, {
+        zoomControl: true,
+        scrollWheelZoom: false,
+        dragging: false,
+        touchZoom: false,
+        doubleClickZoom: false,
+        boxZoom: false,
+        keyboard: false
+      }).setView([mapConfig.lat, mapConfig.lng], 15);
+      lightLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+        subdomains: 'abcd',
+        maxZoom: 20
+      });
+      darkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+        subdomains: 'abcd',
+        maxZoom: 20
+      });
+      L.marker([mapConfig.lat, mapConfig.lng]).addTo(map).bindPopup(mapConfig.popup || '');
+    }
+    applyTheme();
+    setTimeout(function () { if (map) map.invalidateSize(); }, 60);
+  }
+
+  function setMapActive(on) {
+    var currentMapWrap = document.getElementById('mapWrap');
+    mapActive = on;
+    if (!map || !currentMapWrap) return;
+    if (on) {
+      currentMapWrap.classList.add('map-active');
+      if (map.scrollWheelZoom && map.scrollWheelZoom.enable) map.scrollWheelZoom.enable();
+      if (map.dragging && map.dragging.enable) map.dragging.enable();
+      if (map.touchZoom && map.touchZoom.enable) map.touchZoom.enable();
+      if (map.doubleClickZoom && map.doubleClickZoom.enable) map.doubleClickZoom.enable();
+    } else {
+      currentMapWrap.classList.remove('map-active');
+      if (map.scrollWheelZoom && map.scrollWheelZoom.disable) map.scrollWheelZoom.disable();
+      if (map.dragging && map.dragging.disable) map.dragging.disable();
+      if (map.touchZoom && map.touchZoom.disable) map.touchZoom.disable();
+      if (map.doubleClickZoom && map.doubleClickZoom.disable) map.doubleClickZoom.disable();
+    }
+  }
+
+  function syncVolumeToggle() {
+    if (volumeToggle && topVol) volumeToggle.checked = parseFloat(topVol.value || 0) > 0;
+  }
+
+  function isSupportingInfoNode(node) {
+    if (!node || node.nodeType !== 1) return false;
+    if (node.matches('a,button,.actions,.grid2,#mapWrap,.contact,.creator-link,.btn')) return true;
+    return !!node.querySelector('a[href],button,.actions,#mapWrap,.contact,.creator-link,.btn');
+  }
+
+  function isContextInfoNode(node) {
+    if (!node || node.nodeType !== 1) return false;
+    if (node.matches('p') && !node.querySelector('a[href],button')) return true;
+    if (node.matches('.stack') && node.querySelector('p') && !isSupportingInfoNode(node)) return true;
+    return false;
+  }
+
+  function applySemanticInfoSections(unifiedBody, headingId) {
+    if (!unifiedBody || unifiedBody.dataset.semanticGrouped === '1') return;
+    var children = Array.from(unifiedBody.children);
+    if (!children.length) return;
+
+    var context = document.createElement('section');
+    context.className = 'info-section info-section-context';
+    context.setAttribute('role', 'group');
+    var body = document.createElement('section');
+    body.className = 'info-section info-section-body';
+    body.setAttribute('role', 'group');
+    var supporting = document.createElement('section');
+    supporting.className = 'info-section info-section-support';
+    supporting.setAttribute('role', 'group');
+    if (headingId) {
+      context.setAttribute('aria-labelledby', headingId);
+      body.setAttribute('aria-labelledby', headingId);
+      supporting.setAttribute('aria-labelledby', headingId);
+    }
+    var contextAssigned = false;
+
+    children.forEach(function (node) {
+      if (headingId && node.id === headingId) {
+        return;
+      }
+      if (isSupportingInfoNode(node)) {
+        supporting.appendChild(node);
+        return;
+      }
+      if (!contextAssigned && isContextInfoNode(node)) {
+        context.appendChild(node);
+        contextAssigned = true;
+        return;
+      }
+      body.appendChild(node);
+    });
+
+    if (context.children.length) unifiedBody.appendChild(context);
+    if (body.children.length) unifiedBody.appendChild(body);
+    if (supporting.children.length) unifiedBody.appendChild(supporting);
+    unifiedBody.dataset.semanticGrouped = '1';
+  }
+
+  function normalizeTabPaneStructure(pane) {
+    if (!pane) return;
+    var heading = pane.querySelector(':scope > h2');
+    if (!heading) return;
+    var existingUnified = pane.querySelector(':scope > .info-unified-card');
+    if (existingUnified) return;
+
+    var unifiedCard = document.createElement('div');
+    unifiedCard.className = 'card info-unified-card';
+    var headingId = heading.id;
+    if (!headingId) {
+      headingId = pane.id ? (pane.id + '-heading') : ('info-heading-' + (++infoHeadingUid));
+      heading.id = headingId;
+    }
+    unifiedCard.setAttribute('role', 'region');
+    unifiedCard.setAttribute('aria-labelledby', headingId);
+    var unifiedBody = document.createElement('div');
+    unifiedBody.className = 'info-unified-body';
+    unifiedBody.appendChild(heading);
+
+    var nodesToMove = [];
+    Array.from(pane.children).forEach(function (child) {
+      if (child !== heading) nodesToMove.push(child);
+    });
+    nodesToMove.forEach(function (child) {
+      unifiedBody.appendChild(child);
+    });
+    applySemanticInfoSections(unifiedBody, headingId);
+
+    unifiedCard.appendChild(unifiedBody);
+    pane.appendChild(unifiedCard);
+  }
+
+  function setVol(v) {
+    const val = Math.max(0, Math.min(1, parseFloat(v) || 0));
+    if (val > 0) lastAudibleVolume = val;
+    if (video) {
+      video.muted = false;
+      video.volume = val;
+    }
+    if (topVol) {
+      topVol.value = val;
+      fill(topVol);
+    }
+    syncVolumeToggle();
+  }
+
+  function updateInfoBtn() {
+    if (!infoBtn || !infoLabel || !infoQr) return;
+    var isVideoActive = videoWrap && videoWrap.style.display === 'block';
+    var isLandingVisible = landing && landing.style.display !== 'none';
+    var qrEnabled = qrToggle && qrToggle.checked;
+    var isInfoOpen = b.classList.contains('info-open');
+
+    // Always remove disabled class when video is active
+    if (isVideoActive) {
+      infoBtn.classList.remove('disabled');
+    }
+
+    // Hide info button if UI is hidden (except QR global override on landing)
+    if (uiToggle && uiToggle.checked) {
+      if (qrEnabled && isLandingVisible && !isVideoActive) {
+        infoBtn.classList.remove('disabled');
+        infoBtn.style.display = 'flex';
+        infoQr.style.display = 'flex';
+        infoLabel.style.display = 'none';
+        infoQr.innerHTML = '';
+        if (typeof QRCode !== 'undefined') {
+          try {
+            new QRCode(infoQr, { text: 'https://solidstate872.github.io/comingsoon/', width: 74, height: 74 });
+          } catch (err) {}
+        }
+        return;
+      }
+      infoBtn.style.display = 'none';
+      return;
+    }
+
+    // Show QR globally when enabled
+    if (qrEnabled) {
+      infoBtn.classList.remove('disabled');
+      infoBtn.style.display = 'flex';
+      if (isInfoOpen) {
+        infoQr.style.display = 'none';
+        infoLabel.style.display = 'block';
+        infoLabel.textContent = 'Home';
+        return;
+      }
+      infoQr.style.display = 'flex';
+      infoLabel.style.display = 'none';
+      infoQr.innerHTML = '';
+      if (typeof QRCode !== 'undefined') {
+        try {
+          new QRCode(infoQr, { text: 'https://solidstate872.github.io/comingsoon/', width: 74, height: 74 });
+        } catch (err) {}
+      }
+      return;
+    }
+
+    // No QR: only show info button when video is active
+    if (!isVideoActive) {
+      infoBtn.style.display = 'none';
+      return;
+    }
+
+    // Video active, no QR - show Info/Home button
+    infoBtn.classList.remove('disabled');
+    infoBtn.style.display = 'flex';
+    infoQr.style.display = 'none';
+    infoLabel.style.display = 'block';
+    infoLabel.textContent = isInfoOpen ? 'Home' : 'Info';
+  }
+  window.updateInfoBtn = updateInfoBtn;
+
+  function showLanding() {
+    b.classList.remove('info-open', 'hide-ui', 'hover');
+    window._videoSelectionPlaybackReady = false;
+    if (video) {
+      video.pause();
+      video.currentTime = 0;
+    }
+    if (videoWrap) videoWrap.style.display = 'none';
+    if (head) head.style.width = '0%';
+    if (buf) buf.style.width = '0%';
+    if (landing) landing.style.display = 'block';
+    closeMenu();
+    closeModal();
+    closeSettingsPanel();
+    setMapActive(false);
+    resetEdgeIntent();
+    setTab(getTabOrder()[0] || 'about', true);
+    updateInfoBtn();
+    startProgress();
+  }
+
+  function startExperience() {
+    if (sceneLock) return;
+    stopProgress();
+    if (landing) landing.style.display = 'none';
+    if (videoWrap) videoWrap.style.display = 'block';
+    if (video) video.play().catch(function () {});
+    if (infoBtn) {
+      infoBtn.classList.remove('disabled');
+    }
+    updateInfoBtn();
+    lockScene(420);
+  }
+
+  function openInfo() {
+    if (!isInfoEnabled()) {
+      if (menu && !menu.classList.contains('open')) openMenu();
+      return;
+    }
+    if (videoWrap && videoWrap.style.display !== 'block' || sceneLock) return;
+    b.classList.add('info-open');
+    ensureMap();
+    updateInfoBtn();
+    lockScene(520);
+  }
+
+  function closeInfoPanel() {
+    if (!b.classList.contains('info-open') || sceneLock) return;
+    b.classList.remove('info-open');
+    if (tabsWrap) tabsWrap.classList.remove('open');
+    if (mobileMenu) {
+      mobileMenu.classList.remove('open');
+      mobileMenu.setAttribute('aria-expanded', 'false');
+    }
+    setMapActive(false);
+    resetEdgeIntent();
+    updateInfoBtn();
+    lockScene(520);
+  }
+
+  function escapeHtml(value) {
+    return String(value == null ? '' : value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function normalizeStringList(value) {
+    if (Array.isArray(value)) return value.filter(Boolean);
+    if (typeof value === 'string' && value.trim()) return [value.trim()];
+    return [];
+  }
+
+  function renderTemplateParagraphs(lines) {
+    return lines.map(function (line, idx) {
+      return '<p style="margin:' + (idx === 0 ? '0' : '16px 0 0') + '">' + escapeHtml(line) + '</p>';
+    }).join('');
+  }
+
+  function renderTemplateLink(link) {
+    if (!link || !link.url || !link.label) return '';
+    var openInNewTab = link.newTab !== false && !/^tel:/i.test(String(link.url));
+    return '<a class="contact" href="' + escapeHtml(link.url) + '"'
+      + (openInNewTab ? ' target="_blank" rel="noopener noreferrer"' : '')
+      + '>' + escapeHtml(link.label) + '</a>';
+  }
+
+  function renderTemplateSection(section) {
+    if (!section) return '';
+    var body = '';
+    var contentLines = normalizeStringList(section.content);
+    if (contentLines.length) {
+      body += renderTemplateParagraphs(contentLines);
+    }
+    if (section.html) {
+      body += section.html;
+    }
+    if (Array.isArray(section.links) && section.links.length) {
+      body += section.links.map(renderTemplateLink).join('');
+    }
+    if (!body) return '';
+    return '<section class="info-template-section">' + body + '</section>';
+  }
+
+  function normalizeTemplateModel(tab) {
+    var template = tab && tab.template ? tab.template : null;
+    if (template) {
+      return {
+        title: template.title || tab.title || '',
+        label: tab.label || '',
+        subtitle: template.subtitle || '',
+        description: normalizeStringList(template.description),
+        sections: Array.isArray(template.sections) ? template.sections : [],
+        links: Array.isArray(template.links) ? template.links : [],
+        legacyContent: ''
+      };
+    }
+    return {
+      title: tab.title || '',
+      label: tab.label || '',
+      subtitle: '',
+      description: [],
+      sections: tab.content ? [{ heading: 'About / Overview', html: tab.content }] : [],
+      links: [],
+      legacyContent: tab.content || ''
+    };
+  }
+
+  function normalizeComparableText(value) {
+    return String(value || '').trim().toLowerCase();
+  }
+
+  function isEquivalentText(a, b) {
+    return normalizeComparableText(a) && normalizeComparableText(a) === normalizeComparableText(b);
+  }
+
+  function renderInfoTemplateContent(tab) {
+    var model = normalizeTemplateModel(tab || {});
+    var hasStructured = !!(model.subtitle || model.description.length || model.sections.length || model.links.length);
+    if (!hasStructured) return model.legacyContent;
+
+    var firstSectionHeading = model.sections[0] && model.sections[0].heading ? model.sections[0].heading : '';
+    var showSubtitle = !!model.subtitle
+      && !isEquivalentText(model.subtitle, model.title)
+      && !isEquivalentText(model.subtitle, model.label)
+      && !isEquivalentText(model.subtitle, firstSectionHeading);
+    var descriptionLines = model.description.filter(function (line) {
+      return !isEquivalentText(line, model.title)
+        && !isEquivalentText(line, model.label)
+        && !isEquivalentText(line, firstSectionHeading)
+        && !(showSubtitle && isEquivalentText(line, model.subtitle));
+    });
+
+    var html = '<div class="stack info-template">';
+    if (descriptionLines.length) {
+      html += '<section class="info-template-description">' + renderTemplateParagraphs(descriptionLines) + '</section>';
+    }
+    if (model.sections.length) {
+      html += '<div class="info-template-sections">' + model.sections.map(renderTemplateSection).join('') + '</div>';
+    }
+    if (model.links.length) {
+      html += '<section class="info-template-links">' + model.links.map(renderTemplateLink).join('') + '</section>';
+    }
+    html += '</div>';
+    return html;
+  }
+
+  function renderInfoPanelForVideo(videoId) {
+    var cfg = window.VIDEO_CONFIG && window.VIDEO_CONFIG[videoId];
+    if (!cfg || !cfg.tabs || !tabsWrap || !contentWrap) return;
+    window.currentVideoId = videoId;
+    destroyMap();
+    setMapActive(false);
+    tabsWrap.innerHTML = '';
+    contentWrap.innerHTML = '';
+    var firstTabId = cfg.tabs[0] && cfg.tabs[0].id;
+    cfg.tabs.forEach(function (tab, idx) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.dataset.tab = tab.id;
+      btn.textContent = tab.label;
+      btn.classList.toggle('active', idx === 0);
+      btn.setAttribute('aria-selected', idx === 0 ? 'true' : 'false');
+      tabsWrap.appendChild(btn);
+      var pane = document.createElement('div');
+      pane.className = 'tab' + (idx === 0 ? ' active' : '');
+      pane.id = tab.id;
+      var h2 = document.createElement('h2');
+      var templateModel = normalizeTemplateModel(tab);
+      h2.textContent = tab.label || templateModel.title;
+      pane.appendChild(h2);
+      var contentDiv = document.createElement('div');
+      contentDiv.innerHTML = renderInfoTemplateContent(tab);
+      while (contentDiv.firstChild) pane.appendChild(contentDiv.firstChild);
+      normalizeTabPaneStructure(pane);
+      contentWrap.appendChild(pane);
+    });
+    setTab(firstTabId, true);
+    updateInfoBtn();
+  }
+
+  function setTab(id, resetScroll) {
+    if (!id) return;
+    getTabButtons().forEach(function (btn) {
+      const on = btn.dataset.tab === id;
+      btn.classList.toggle('active', on);
+      btn.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    getTabPanes().forEach(function (p) {
+      const on = p.id === id;
+      p.classList.toggle('active', on);
+      if (on && resetScroll) p.scrollTop = 0;
+    });
+    if (window.innerWidth <= 768) {
+      if (tabsWrap) tabsWrap.classList.remove('open');
+      if (mobileMenu) {
+        mobileMenu.classList.remove('open');
+        mobileMenu.setAttribute('aria-expanded', 'false');
+      }
+    }
+    var mapCfg = getMapConfigForTab(id);
+    if (mapCfg) ensureMap(mapCfg);
+  }
+
+  function shiftTab(direction) {
+    if (tabSwitchLock) return false;
+    const order = getTabOrder();
+    const nextIndex = activeTabIndex() + direction;
+    if (nextIndex < 0 || nextIndex >= order.length) return false;
+    tabSwitchLock = true;
+    setTab(order[nextIndex], true);
+    setTimeout(function () { tabSwitchLock = false; }, 560);
+    return true;
+  }
+
+  function handleInfoEdge(direction) {
+    if (!isInfoEnabled()) return;
+    if (tabSwitchLock || sceneLock) return;
+    edgeIntent += direction > 0 ? 100 : -100;
+    if (edgeIntentTimer) clearTimeout(edgeIntentTimer);
+    edgeIntentTimer = setTimeout(resetEdgeIntent, 220);
+    if (Math.abs(edgeIntent) < 220) return;
+    resetEdgeIntent();
+    if (direction > 0) {
+      shiftTab(1);
+    } else if (!shiftTab(-1)) {
+      closeInfoPanel();
+    }
+  }
+
+  function showUI() {
+    b.classList.remove('hide-ui');
+    updateInfoBtn();
+  }
+
+  function hideUI() {
+    b.classList.add('hide-ui');
+    closeMenu();
+    closeModal();
+    updateInfoBtn();
+  }
+
+  if (topVol) setVol(0.33);
+  setInfoSystemEnabled(true);
+  if (window.currentVideoId && window.VIDEO_CONFIG && window.VIDEO_CONFIG[window.currentVideoId]) {
+    renderInfoPanelForVideo(window.currentVideoId);
+  } else {
+    getTabPanes().forEach(normalizeTabPaneStructure);
+    setTab(getTabOrder()[0] || 'about', true);
+  }
+  if (infoBtn) {
+    infoBtn.style.display = 'none';
+    infoBtn.classList.add('disabled');
+  }
+  startProgress();
+
+  function isLandingClickTarget(el) {
+    if (!el) return false;
+    return !(topControls && topControls.contains(el)) && !(settings && settings.contains(el)) && !(panel && panel.contains(el));
+  }
+
+  function isGlobalModalOpenTarget(el) {
+    if (!el) return false;
+    return !(topControls && topControls.contains(el))
+      && !(settings && settings.contains(el))
+      && !(panel && panel.contains(el))
+      && !(menu && menu.contains(el))
+      && !(modal && modal.contains(el))
+      && !(modalShade && modalShade.contains(el))
+      && !(shade && shade.contains(el))
+      && !(infoPanel && infoPanel.contains(el));
+  }
+
+  document.addEventListener('click', function (e) {
+    if (!landing || !videoWrap || !menu) return;
+    if (landing.style.display === 'none' || videoWrap.style.display === 'block') return;
+    if (menu.classList.contains('open')) return;
+    if (panel && panel.classList.contains('open')) return;
+    if (modal && modal.classList.contains('open')) return;
+    if (!isLandingClickTarget(e.target)) return;
+    e.stopImmediatePropagation();
+    e.preventDefault();
+    openMenu();
+  }, true);
+
+  document.addEventListener('click', function (e) {
+    if (!videoWrap || videoWrap.style.display !== 'block') return;
+    if (!menu || menu.classList.contains('open')) return;
+    if (panel && panel.classList.contains('open')) return;
+    if (modal && modal.classList.contains('open')) return;
+    if (b.classList.contains('info-open')) return;
+    if (!isGlobalModalOpenTarget(e.target)) return;
+    e.stopImmediatePropagation();
+    e.preventDefault();
+    openMenu();
+  }, true);
+
+  if (landing) {
+    landing.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openMenu();
+      }
+    });
+  }
+  if (startBar) {
+    startBar.addEventListener('mouseenter', function () { b.classList.add('hover'); });
+    startBar.addEventListener('mouseleave', function () { b.classList.remove('hover'); });
+  }
+  if (portalBtn) {
+    portalBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (menu && menu.classList.contains('open')) closeMenu();
+      else openMenu();
+    });
+  }
+  if (shade) shade.addEventListener('click', closeMenu);
+
+  // Menu Info Button toggle
+  if (menuInfoBtn && menuInfoSection) {
+    menuInfoBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      menuInfoSection.classList.toggle('open');
+      menuInfoBtn.textContent = menuInfoSection.classList.contains('open') ? 'Close' : 'Info';
+    });
+  }
+
+  // Reset menu info section when menu closes
+  function resetMenuInfoSection() {
+    if (menuInfoSection) menuInfoSection.classList.remove('open');
+    if (menuInfoBtn) menuInfoBtn.textContent = 'Info';
+  }
+  document.addEventListener('click', function (e) {
+    if (menu && menu.classList.contains('open') && !menu.contains(e.target) && portalBtn && !portalBtn.contains(e.target)) closeMenu();
+    if (panel && panel.classList.contains('open') && !panel.contains(e.target) && settingsBtn && !settingsBtn.contains(e.target)) closeSettingsPanel();
+    if (window.innerWidth <= 768 && tabsWrap && tabsWrap.classList.contains('open') && !tabsWrap.contains(e.target) && mobileMenu && !mobileMenu.contains(e.target)) {
+      tabsWrap.classList.remove('open');
+      if (mobileMenu) {
+        mobileMenu.classList.remove('open');
+        mobileMenu.setAttribute('aria-expanded', 'false');
+      }
+    }
+    var mw = document.getElementById('mapWrap');
+    if (mapActive && mw && !mw.contains(e.target)) setMapActive(false);
+  });
+  if (infoBtn) {
+    infoBtn.addEventListener('click', function () {
+      if (!isInfoEnabled()) return;
+      // Simple toggle: Info panel open -> close it, otherwise -> open it
+      // QR click opens modal only when QR is visible (not when showing Home)
+      if (b.classList.contains('info-open')) {
+        closeInfoPanel();
+      } else if (qrToggle && qrToggle.checked && infoQr && infoQr.style.display !== 'none') {
+        openModal();
+      } else {
+        openInfo();
+      }
+    });
+    infoBtn.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        infoBtn.click();
+      }
+    });
+  }
+  if (closeInfo) closeInfo.addEventListener('click', closeInfoPanel);
+  if (mobileMenu && tabsWrap) {
+    mobileMenu.addEventListener('click', function (e) {
+      if (!isInfoEnabled()) return;
+      e.stopPropagation();
+      const open = tabsWrap.classList.toggle('open');
+      mobileMenu.classList.toggle('open', open);
+      mobileMenu.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+  }
+  if (tabsWrap) {
+    tabsWrap.addEventListener('click', function (e) {
+      if (!isInfoEnabled()) return;
+      const btn = e.target && e.target.closest ? e.target.closest('button[data-tab]') : null;
+      if (!btn) return;
+      setTab(btn.dataset.tab);
+      tabsWrap.classList.remove('open');
+      if (mobileMenu) {
+        mobileMenu.classList.remove('open');
+        mobileMenu.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+  if (settingsBtn) {
+    settingsBtn.addEventListener('click', function () {
+      if (uiToggle && uiToggle.checked) {
+        uiToggle.checked = false;
+        showUI();
+      }
+      const open = panel ? panel.classList.toggle('open') : false;
+      settingsBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+  }
+  if (closeSettings) closeSettings.addEventListener('click', closeSettingsPanel);
+  if (darkToggle) {
+    darkToggle.addEventListener('change', function () {
+      b.classList.toggle('dark', darkToggle.checked);
+      applyTheme();
+    });
+  }
+  if (fullscreenToggle) {
+    fullscreenToggle.addEventListener('change', function () {
+      if (fullscreenToggle.checked) {
+        const el = document.documentElement;
+        if (el.requestFullscreen) el.requestFullscreen().catch(function () {});
+      } else if (document.fullscreenElement && document.exitFullscreen) {
+        document.exitFullscreen().catch(function () {});
+      }
+    });
+  }
+  if (videoToggle) {
+    videoToggle.addEventListener('change', function () {
+      if (videoToggle.checked) {
+        if (videoWrap && videoWrap.style.display !== 'block') startExperience();
+        else if (video) video.play().catch(function () {});
+      } else if (video) video.pause();
+    });
+  }
+  if (volumeToggle) {
+    volumeToggle.addEventListener('change', function () {
+      if (volumeToggle.checked) {
+        setVol(lastAudibleVolume > 0 ? lastAudibleVolume : 0.33);
+      } else {
+        if (video) {
+          video.muted = false;
+          video.volume = 0;
+        }
+        if (topVol) {
+          topVol.value = 0;
+          fill(topVol);
+        }
+        syncVolumeToggle();
+      }
+    });
+  }
+  if (topVol) topVol.addEventListener('input', function () { setVol(topVol.value); });
+  if (qrToggle) qrToggle.addEventListener('change', updateInfoBtn);
+  if (infoToggle) {
+    infoToggle.addEventListener('change', function () {
+      setInfoSystemEnabled(!infoToggle.checked);
+    });
+  }
+  if (uiToggle) uiToggle.addEventListener('change', function () {
+    if (uiToggle.checked) hideUI();
+    else showUI();
+  });
+  if (resetToggle) resetToggle.addEventListener('change', function () {
+    if (resetToggle.checked) {
+      setTimeout(function () {
+        location.reload();
+      }, 220);
+    }
+  });
+  if (modalCancel) modalCancel.addEventListener('click', closeModal);
+  if (modalShade) modalShade.addEventListener('click', closeModal);
+  if (modalProceed) {
+    modalProceed.addEventListener('click', function () {
+      window.open('https://solidstate872.github.io/comingsoon/', '_blank', 'noopener,noreferrer');
+      closeModal();
+    });
+  }
+  if (contentWrap) {
+    contentWrap.addEventListener('dblclick', function (e) {
+      var mw = e.target && e.target.closest ? e.target.closest('#mapWrap') : null;
+      if (mw) {
+        var tab = activeTab();
+        var mapCfg = tab ? getMapConfigForTab(tab.id) : null;
+        if (mapCfg) {
+          ensureMap(mapCfg);
+          setMapActive(true);
+        }
+      }
+    });
+  }
+  window.addEventListener('wheel', function (e) {
+    if (menu && menu.classList.contains('open') || panel && panel.classList.contains('open') || modal && modal.classList.contains('open') || sceneLock) return;
+    if (b.classList.contains('info-open')) {
+      if (!isInfoEnabled()) {
+        closeInfoPanel();
+        return;
+      }
+      const tab = activeTab();
+      if (!tab) return;
+      const atTop = tab.scrollTop <= 2;
+      const atBottom = tab.scrollTop + tab.clientHeight >= tab.scrollHeight - 2;
+      if (e.deltaY < 0 && atTop) {
+        e.preventDefault();
+        handleInfoEdge(-1);
+      } else if (e.deltaY > 0 && atBottom) {
+        e.preventDefault();
+        handleInfoEdge(1);
+      } else {
+        resetEdgeIntent();
+      }
+      return;
+    }
+    if (videoWrap && videoWrap.style.display !== 'block') return;
+    if (e.deltaY > 70) {
+      e.preventDefault();
+      openInfo();
+    } else if (e.deltaY < -70) {
+      e.preventDefault();
+      showLanding();
+    }
+  }, { passive: false });
+  window.addEventListener('touchstart', function (e) {
+    if (!e.touches || e.touches.length !== 1) return;
+    tracking = true;
+    tx = e.touches[0].clientX;
+    ty = e.touches[0].clientY;
+  }, { passive: true });
+  window.addEventListener('touchend', function (e) {
+    if (!tracking || !e.changedTouches || !e.changedTouches[0] || sceneLock) return;
+    const dx = e.changedTouches[0].clientX - tx;
+    const dy = e.changedTouches[0].clientY - ty;
+    tracking = false;
+    if (Math.abs(dx) <= 70 || Math.abs(dx) <= Math.abs(dy) * 1.25) return;
+    if (!b.classList.contains('info-open') && dx < 0 && videoWrap && videoWrap.style.display === 'block') openInfo();
+    if (!b.classList.contains('info-open') && dx > 0 && videoWrap && videoWrap.style.display === 'block') showLanding();
+    if (b.classList.contains('info-open') && dx > 0) closeInfoPanel();
+  }, { passive: true });
+  // Track selected index for arrow key navigation in menu
+  var menuSelectedIndex = -1;
+
+  function isEditableElement(el) {
+    if (!el) return false;
+    var tagName = el.tagName ? el.tagName.toLowerCase() : '';
+    return tagName === 'input' || tagName === 'textarea' || tagName === 'select' || el.isContentEditable;
+  }
+
+  function getVisibleResults() {
+    return Array.from(document.querySelectorAll('#menu .result[data-video-id]:not([hidden])'));
+  }
+
+  function setMenuSelection(index) {
+    var results = getVisibleResults();
+    // Remove previous selection
+    results.forEach(function(r) { r.classList.remove('selected'); });
+    // Set new selection
+    if (index >= 0 && index < results.length) {
+      menuSelectedIndex = index;
+      results[index].classList.add('selected');
+      results[index].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    } else {
+      menuSelectedIndex = -1;
+    }
+  }
+
+  function resetMenuSelection() {
+    menuSelectedIndex = -1;
+    var results = getVisibleResults();
+    results.forEach(function(r) { r.classList.remove('selected'); });
+  }
+
+  window.addEventListener('keydown', function (e) {
+    // Spacebar: Open menu and pause video (unless in editable element)
+    if (e.key === ' ') {
+      if (isEditableElement(e.target)) return;
+      if (menu && menu.classList.contains('open')) return;
+      if (panel && panel.classList.contains('open')) return;
+      if (modal && modal.classList.contains('open')) return;
+      if (b.classList.contains('info-open')) return;
+      if (!videoWrap || videoWrap.style.display !== 'block') return;
+      e.preventDefault();
+      openMenu();
+      return;
+    }
+
+    // Escape: Close panels
+    if (e.key === 'Escape') {
+      if (menu && menu.classList.contains('open')) closeMenu();
+      else if (panel && panel.classList.contains('open')) closeSettingsPanel();
+      else if (modal && modal.classList.contains('open')) closeModal();
+      else if (b.classList.contains('info-open')) closeInfoPanel();
+      return;
+    }
+
+    // Arrow keys: Navigate menu results (only when menu is open)
+    if (menu && menu.classList.contains('open')) {
+      var results = getVisibleResults();
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (results.length === 0) return;
+        if (menuSelectedIndex === -1 || menuSelectedIndex >= results.length - 1) {
+          setMenuSelection(0); // Wrap to first or select first if none selected
+        } else {
+          setMenuSelection(menuSelectedIndex + 1);
+        }
+        return;
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (results.length === 0) return;
+        if (menuSelectedIndex <= 0) {
+          setMenuSelection(results.length - 1); // Wrap to last
+        } else {
+          setMenuSelection(menuSelectedIndex - 1);
+        }
+        return;
+      }
+      // Enter: Activate selected item (global handler when menu is open)
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        if (menuSelectedIndex >= 0 && menuSelectedIndex < results.length) {
+          var videoId = results[menuSelectedIndex].getAttribute('data-video-id');
+          if (videoId && typeof window.attemptVideoLoad === 'function') window.attemptVideoLoad(videoId);
+        } else if (results.length > 0) {
+          // Fallback to first result if no selection
+          var videoId = results[0].getAttribute('data-video-id');
+          if (videoId && typeof window.attemptVideoLoad === 'function') window.attemptVideoLoad(videoId);
+        }
+        return;
+      }
+    }
+  });
+  window.renderInfoPanelForVideo = renderInfoPanelForVideo;
+  window.setActiveInfoTab = setTab;
+
+  if (video) {
+    video.addEventListener('play', function () {
+      if (videoToggle) videoToggle.checked = true;
+    });
+    video.addEventListener('pause', function () { if (videoToggle) videoToggle.checked = false; });
+    video.addEventListener('progress', function () {
+      if (video.buffered.length) {
+        const end = video.buffered.end(video.buffered.length - 1);
+        const dur = video.duration || 1;
+        if (buf) buf.style.width = (end / dur * 100) + '%';
+      }
+    });
+    video.addEventListener('timeupdate', function () {
+      if (video.duration && head) head.style.width = (video.currentTime / video.duration * 100) + '%';
+    });
+  }
+});
+</script>
+<script>
+(function(){
+  const THRESHOLD = 140;
+  const EDGE = 4;
+  const COOLDOWN_MS = 560;
+  let wheelIntent = 0;
+  let wheelTimer = null;
+  let transitionLock = false;
+  let experienceStarted = false;
+  if (typeof window._videoSelectionPlaybackReady !== 'boolean') {
+    window._videoSelectionPlaybackReady = false;
+  }
+  let touchPanActive = false;
+  let touchPanMoved = false;
+  let touchPanBaseX = 0;
+  let touchPanBaseY = 0;
+  let currentPanX = 0;
+  let currentPanY = 0;
+
+  function resetWheelIntent(){
+    wheelIntent = 0;
+    if (wheelTimer) {
+      clearTimeout(wheelTimer);
+      wheelTimer = null;
+    }
+  }
+
+  function pushWheelIntent(delta){
+    wheelIntent += delta;
+    if (wheelTimer) {
+      clearTimeout(wheelTimer);
+    }
+    wheelTimer = setTimeout(resetWheelIntent, 180);
+    return Math.abs(wheelIntent) >= THRESHOLD;
+  }
+
+  function lockTransitions(){
+    transitionLock = true;
+    setTimeout(function(){
+      transitionLock = false;
+    }, COOLDOWN_MS);
+  }
+
+  function isVideoActive(){
+    const videoWrap = document.getElementById('video');
+    return !!videoWrap && videoWrap.style.display === 'block';
+  }
+
+  function getLanding(){
+    return document.querySelector('.landing');
+  }
+
+  function markExperienceStarted(){
+    experienceStarted = true;
+  }
+
+  function ensureVideoPlayback(){
+    const video = document.getElementById('player');
+    const videoWrap = document.getElementById('video');
+    const videoToggle = document.getElementById('videoToggle');
+
+    if (!video || !videoWrap || videoWrap.style.display !== 'block') {
+      return;
+    }
+    if (!window._videoSelectionPlaybackReady) {
+      return;
+    }
+    if (videoToggle && videoToggle.checked === false) {
+      return;
+    }
+    if (video.paused) {
+      video.play().catch(function(){});
+    }
+  }
+
+  function clamp(value, min, max){
+    return Math.max(min, Math.min(max, value));
+  }
+
+  function getVideoScale(){
+    const videoWrap = document.getElementById('video');
+    if (!videoWrap) {
+      return window.matchMedia('(max-width: 768px)').matches ? 1.34 : 1.1;
+    }
+    const scaleValue = parseFloat(getComputedStyle(videoWrap).getPropertyValue('--video-scale'));
+    return Number.isFinite(scaleValue) && scaleValue > 0 ? scaleValue : (window.matchMedia('(max-width: 768px)').matches ? 1.34 : 1.1);
+  }
+
+  function updateVideoStageSize(){
+    const videoWrap = document.getElementById('video');
+    const video = document.getElementById('player');
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const scale = getVideoScale();
+    let stageWidth = viewportWidth;
+    let stageHeight = viewportHeight;
+
+    if (video && video.videoWidth && video.videoHeight && viewportWidth && viewportHeight) {
+      const videoAspect = video.videoWidth / video.videoHeight;
+      const viewportAspect = viewportWidth / viewportHeight;
+
+      if (videoAspect > viewportAspect) {
+        stageHeight = viewportHeight * scale;
+        stageWidth = stageHeight * videoAspect;
+      } else {
+        stageWidth = viewportWidth * scale;
+        stageHeight = stageWidth / videoAspect;
+      }
+    } else {
+      stageWidth = viewportWidth * scale;
+      stageHeight = viewportHeight * scale;
+    }
+
+    if (videoWrap) {
+      let stageWidthPx = Math.ceil(stageWidth);
+      let stageHeightPx = Math.ceil(stageHeight);
+      if (stageWidthPx % 2 !== 0) stageWidthPx += 1;
+      if (stageHeightPx % 2 !== 0) stageHeightPx += 1;
+      videoWrap.style.setProperty('--video-stage-w', stageWidthPx + 'px');
+      videoWrap.style.setProperty('--video-stage-h', stageHeightPx + 'px');
+    }
+  }
+
+  function snapToDevicePixel(value){
+    const dpr = window.devicePixelRatio || 1;
+    return Math.round(value * dpr) / dpr;
+  }
+
+  function getPanLimits(){
+    const videoWrap = document.getElementById('video');
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
+    const stageWidth = videoWrap ? parseFloat(getComputedStyle(videoWrap).getPropertyValue('--video-stage-w')) : 0;
+    const stageHeight = videoWrap ? parseFloat(getComputedStyle(videoWrap).getPropertyValue('--video-stage-h')) : 0;
+
+    if (!stageWidth || !stageHeight || !viewportWidth || !viewportHeight) {
+      return {
+        x: isMobile ? 72 : 26,
+        y: isMobile ? 0 : 16
+      };
+    }
+
+    const overflowX = Math.max(0, (stageWidth - viewportWidth) / 2);
+    const overflowY = Math.max(0, (stageHeight - viewportHeight) / 2);
+    const safeX = Math.max(0, overflowX - 8);
+    const safeY = Math.max(0, overflowY - 8);
+
+    return {
+      x: isMobile ? safeX : Math.min(safeX, 26),
+      y: isMobile ? Math.min(safeY, 10) : Math.min(safeY, 16)
+    };
+  }
+
+  function setVideoPan(x, y){
+    const videoWrap = document.getElementById('video');
+    const limits = getPanLimits();
+    if (!videoWrap) {
+      return;
+    }
+    currentPanX = snapToDevicePixel(clamp(x, -limits.x, limits.x));
+    currentPanY = snapToDevicePixel(clamp(y, -limits.y, limits.y));
+    videoWrap.style.setProperty('--video-pan-x', currentPanX + 'px');
+    videoWrap.style.setProperty('--video-pan-y', currentPanY + 'px');
+  }
+
+  function resetVideoPan(){
+    const videoWrap = document.getElementById('video');
+    if (!videoWrap) {
+      return;
+    }
+    videoWrap.classList.remove('dragging');
+    setVideoPan(0, 0);
+  }
+
+  function swapVideoSource(videoId){
+    const cfg = window.VIDEO_CONFIG && window.VIDEO_CONFIG[videoId];
+    if (!cfg) return;
+
+    // Reset per-video unlock state when switching to a different video
+    if (window.currentVideoId && window.currentVideoId !== videoId) {
+      window._currentUnlockedVideoId = null;
+    }
+
+    const src = cfg.src;
+    const isPlaceholder = cfg.isPlaceholder || !src;
+    const body = document.body;
+    const video = document.getElementById('player');
+    const source = video ? video.querySelector('source') : null;
+    const videoWrap = document.getElementById('video');
+    const landing = getLanding();
+    const head = document.getElementById('videoProgress');
+    const buffer = document.getElementById('videoBuffered');
+
+    if (!video || !source || !videoWrap || !landing) {
+      return;
+    }
+
+    // Handle placeholder videos (no video source)
+    if (isPlaceholder) {
+      window.currentVideoId = videoId;
+      markExperienceStarted();
+      body.classList.remove('hover');
+      if (window.isInfoEnabled === false) {
+        body.classList.remove('info-open');
+      } else {
+        body.classList.add('info-open');
+      }
+      landing.style.display = 'none';
+      videoWrap.style.display = 'block';
+      video.pause();
+      var videoToggle = document.getElementById('videoToggle');
+      if (videoToggle) videoToggle.checked = true;
+      if (head) head.style.width = '0%';
+      if (buffer) buffer.style.width = '0%';
+      closePortalMenu(false);
+      if (typeof window.renderInfoPanelForVideo === 'function') {
+        window.renderInfoPanelForVideo(videoId);
+      }
+      syncInfoButtonForVideo();
+      return;
+    }
+
+    if (source.getAttribute('src') === src) {
+      markExperienceStarted();
+      body.classList.remove('info-open', 'hover');
+      landing.style.display = 'none';
+      videoWrap.style.display = 'block';
+      var vt = document.getElementById('videoToggle');
+      if (vt) vt.checked = true;
+      try {
+        video.currentTime = 0;
+      } catch (err) {}
+      closePortalMenu(false);
+      syncInfoButtonForVideo();
+      ensureVideoPlayback();
+      return;
+    }
+
+    markExperienceStarted();
+    body.classList.remove('info-open', 'hover');
+    landing.style.display = 'none';
+    videoWrap.style.display = 'block';
+    var videoToggle = document.getElementById('videoToggle');
+    if (videoToggle) videoToggle.checked = true;
+    if (head) {
+      head.style.width = '0%';
+    }
+    if (buffer) {
+      buffer.style.width = '0%';
+    }
+    source.setAttribute('src', src);
+    video.pause();
+    video.load();
+    updateVideoStageSize();
+    closePortalMenu(false);
+    if (typeof window.renderInfoPanelForVideo === 'function') {
+      window.renderInfoPanelForVideo(videoId);
+    }
+    syncInfoButtonForVideo();
+    setTimeout(function(){
+      updateVideoStageSize();
+      ensureVideoPlayback();
+    }, 40);
+  }
+
+  function selectAndPlayVideo(videoId) {
+    window._videoSelectionPlaybackReady = true;
+    resetWheelIntent();
+    swapVideoSource(videoId);
+  }
+
+  function enforceVideoHub(){
+    const body = document.body;
+    const videoWrap = document.getElementById('video');
+    const landing = getLanding();
+
+    if (!experienceStarted || !videoWrap || !landing) {
+      return;
+    }
+    if (videoWrap.style.display === 'none' || landing.style.display !== 'none') {
+      landing.style.display = 'none';
+      videoWrap.style.display = 'block';
+      ensureVideoPlayback();
+      syncInfoButtonForVideo();
+    }
+  }
+
+  function getTabButtons(){
+    return Array.from(document.querySelectorAll('#tabs button[data-tab]'));
+  }
+
+  function getTabIds(){
+    return getTabButtons().map(function(btn){ return btn.dataset.tab; });
+  }
+
+  function getActiveTab(){
+    return document.querySelector('.tab.active');
+  }
+
+  function getActiveTabIndex(){
+    const active = getActiveTab();
+    return active ? getTabIds().indexOf(active.id) : 0;
+  }
+
+  function getFirstTabId(){
+    const ids = getTabIds();
+    return ids.length ? ids[0] : '';
+  }
+
+  function getLastTabId(){
+    const ids = getTabIds();
+    return ids.length ? ids[ids.length - 1] : '';
+  }
+
+  function closeMobileTabs(){
+    const mobileMenu = document.getElementById('mobileMenu');
+    const tabsWrap = document.getElementById('tabs');
+    if (tabsWrap) {
+      tabsWrap.classList.remove('open');
+    }
+    if (mobileMenu) {
+      mobileMenu.classList.remove('open');
+      mobileMenu.setAttribute('aria-expanded', 'false');
+    }
+  }
+
+  function setActiveTab(id, resetScroll){
+    const button = document.querySelector('#tabs button[data-tab="' + id + '"]');
+    const pane = id ? document.getElementById(id) : null;
+    if (!button || !pane) {
+      return;
+    }
+    button.click();
+    if (resetScroll) {
+      pane.scrollTop = 0;
+    }
+  }
+
+  function syncInfoButtonForVideo(){
+    if (window.isInfoEnabled === false) {
+      document.body.classList.remove('info-open');
+    }
+    if (typeof window.updateInfoBtn === 'function') {
+      window.updateInfoBtn();
+    }
+  }
+
+  function closeInfoToVideo(resetToFirst){
+    const body = document.body;
+    const mapWrap = document.getElementById('mapWrap');
+
+    body.classList.remove('info-open');
+    closeMobileTabs();
+    if (mapWrap) {
+      mapWrap.classList.remove('map-active');
+    }
+    if (resetToFirst) {
+      const firstId = getFirstTabId();
+      if (firstId) {
+        setActiveTab(firstId, true);
+      }
+    }
+    markExperienceStarted();
+    enforceVideoHub();
+    ensureVideoPlayback();
+    syncInfoButtonForVideo();
+  }
+
+  function openInfoAt(tabId, resetScroll){
+    if (window.isInfoEnabled === false) {
+      openPortalMenu(false);
+      return;
+    }
+    const body = document.body;
+    body.classList.add('info-open');
+    closeMobileTabs();
+    setActiveTab(tabId || getFirstTabId(), resetScroll !== false);
+    syncInfoButtonForVideo();
+  }
+
+  function openPortalMenu(fromInfo){
+    const body = document.body;
+    const uiToggle = document.getElementById('uiToggle');
+    const shade = document.getElementById('shade');
+    const menu = document.getElementById('menu');
+    const portalBtn = document.getElementById('portalBtn');
+    const portalSearch = document.getElementById('portalSearch');
+
+    if (uiToggle && uiToggle.checked) {
+      uiToggle.checked = false;
+      body.classList.remove('hide-ui');
+    }
+
+    if (shade) {
+      shade.classList.add('open');
+    }
+    if (menu) {
+      menu.classList.add('open');
+    }
+    if (portalBtn) {
+      portalBtn.setAttribute('aria-expanded', 'true');
+    }
+    body.style.overflow = 'hidden';
+    if (typeof window.focusPortalSearchInput === 'function') {
+      window.focusPortalSearchInput(portalSearch, menu);
+    }
+  }
+
+  function closePortalMenu(resetToFirst){
+    const shade = document.getElementById('shade');
+    const menu = document.getElementById('menu');
+    const portalBtn = document.getElementById('portalBtn');
+
+    if (shade) {
+      shade.classList.remove('open');
+    }
+    if (menu) {
+      menu.classList.remove('open');
+    }
+    if (portalBtn) {
+      portalBtn.setAttribute('aria-expanded', 'false');
+    }
+    document.body.style.overflow = '';
+    if (resetToFirst) {
+      const firstId = getFirstTabId();
+      if (firstId) {
+        setActiveTab(firstId, true);
+      }
+    }
+    markExperienceStarted();
+    enforceVideoHub();
+    ensureVideoPlayback();
+    syncInfoButtonForVideo();
+  }
+
+  function moveInfoBy(direction){
+    if (window.isInfoEnabled === false) {
+      return;
+    }
+    const ids = getTabIds();
+    const currentIndex = getActiveTabIndex();
+    if (!ids.length) {
+      return;
+    }
+
+    if (direction > 0) {
+      if (currentIndex < ids.length - 1) {
+        setActiveTab(ids[currentIndex + 1], true);
+      } else {
+        closeInfoToVideo(false);
+        openPortalMenu(true);
+      }
+      return;
+    }
+
+    if (currentIndex > 0) {
+      setActiveTab(ids[currentIndex - 1], true);
+    } else {
+      closeInfoToVideo(false);
+    }
+  }
+
+  function consumeWheel(e){
+    e.preventDefault();
+    e.stopImmediatePropagation();
+  }
+
+  window.addEventListener('wheel', function(e){
+    const body = document.body;
+    const menu = document.getElementById('menu');
+    const panel = document.getElementById('panel');
+    const modal = document.getElementById('modal');
+    const mapWrap = document.getElementById('mapWrap');
+
+    if (transitionLock) {
+      if (isVideoActive() || body.classList.contains('info-open') || (menu && menu.classList.contains('open'))) {
+        consumeWheel(e);
+      }
+      return;
+    }
+
+    if ((panel && panel.classList.contains('open')) || (modal && modal.classList.contains('open'))) {
+      return;
+    }
+
+    if (!isVideoActive()) {
+      return;
+    }
+
+    if (menu && menu.classList.contains('open')) {
+      const portalResults = document.getElementById('portalResults');
+      const menuInfoSection = document.getElementById('menuInfoSection');
+      const isScrollingInsideModal = (portalResults && portalResults.contains(e.target)) || (menuInfoSection && menuInfoSection.contains(e.target));
+      
+      if (isScrollingInsideModal) {
+        return;
+      }
+      
+      consumeWheel(e);
+      if (!pushWheelIntent(e.deltaY)) {
+        return;
+      }
+
+      if (wheelIntent > 0) {
+        closePortalMenu(true);
+      } else {
+        closePortalMenu(false);
+        if (window.isInfoEnabled !== false) {
+          openInfoAt(getLastTabId(), true);
+        }
+      }
+      resetWheelIntent();
+      lockTransitions();
+      return;
+    }
+
+    if (body.classList.contains('info-open')) {
+      const activeTab = getActiveTab();
+      const onInteractiveMap = mapWrap && mapWrap.classList.contains('map-active') && mapWrap.contains(e.target);
+
+      if (!activeTab || onInteractiveMap) {
+        return;
+      }
+
+      const atTop = activeTab.scrollTop <= EDGE;
+      const atBottom = activeTab.scrollTop + activeTab.clientHeight >= activeTab.scrollHeight - EDGE;
+
+      if (e.deltaY < 0 && atTop) {
+        consumeWheel(e);
+        if (!pushWheelIntent(e.deltaY)) {
+          return;
+        }
+        moveInfoBy(-1);
+        resetWheelIntent();
+        lockTransitions();
+        return;
+      }
+
+      if (e.deltaY > 0 && atBottom) {
+        consumeWheel(e);
+        if (!pushWheelIntent(e.deltaY)) {
+          return;
+        }
+        moveInfoBy(1);
+        resetWheelIntent();
+        lockTransitions();
+        return;
+      }
+
+      resetWheelIntent();
+      return;
+    }
+
+    consumeWheel(e);
+
+    if (e.deltaY < 0) {
+      resetWheelIntent();
+      return;
+    }
+
+    if (!pushWheelIntent(e.deltaY)) {
+      return;
+    }
+
+    if (window.isInfoEnabled === false) {
+      openPortalMenu(false);
+      resetWheelIntent();
+      lockTransitions();
+      return;
+    }
+
+    openInfoAt(getFirstTabId(), true);
+    resetWheelIntent();
+    lockTransitions();
+  }, { passive:false, capture:true });
+
+  let touchTracking = false;
+  let touchStartX = 0;
+  let touchStartY = 0;
+
+  window.addEventListener('touchstart', function(e){
+    if (!e.touches || e.touches.length !== 1) {
+      return;
+    }
+    touchTracking = true;
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+
+    const videoWrap = document.getElementById('video');
+    const menu = document.getElementById('menu');
+    const onVideo = isVideoActive() && videoWrap && videoWrap.contains(e.target);
+    const menuOpen = menu && menu.classList.contains('open');
+
+    touchPanActive = !!onVideo && !document.body.classList.contains('info-open') && !menuOpen;
+    touchPanMoved = false;
+    touchPanBaseX = currentPanX;
+    touchPanBaseY = currentPanY;
+    if (touchPanActive && videoWrap) {
+      videoWrap.classList.add('dragging');
+    }
+  }, { passive:true, capture:true });
+
+  window.addEventListener('touchmove', function(e){
+    if (!touchPanActive || !e.touches || !e.touches[0]) {
+      return;
+    }
+    const dx = e.touches[0].clientX - touchStartX;
+    const dy = e.touches[0].clientY - touchStartY;
+    if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
+      touchPanMoved = true;
+    }
+    setVideoPan(touchPanBaseX + dx * 0.82, touchPanBaseY + dy * 0.08);
+  }, { passive:true, capture:true });
+
+  window.addEventListener('touchend', function(e){
+    const menu = document.getElementById('menu');
+    const panel = document.getElementById('panel');
+    const modal = document.getElementById('modal');
+    const videoWrap = document.getElementById('video');
+
+    if (!touchTracking || !e.changedTouches || !e.changedTouches[0] || transitionLock) {
+      touchTracking = false;
+      touchPanActive = false;
+      if (videoWrap) {
+        videoWrap.classList.remove('dragging');
+      }
+      return;
+    }
+
+    if ((panel && panel.classList.contains('open')) || (modal && modal.classList.contains('open'))) {
+      touchTracking = false;
+      touchPanActive = false;
+      if (videoWrap) {
+        videoWrap.classList.remove('dragging');
+      }
+      return;
+    }
+
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    touchTracking = false;
+    if (videoWrap) {
+      videoWrap.classList.remove('dragging');
+    }
+
+    if (Math.abs(dx) <= 70 || Math.abs(dx) <= Math.abs(dy) * 1.25 || !isVideoActive()) {
+      touchPanActive = false;
+      return;
+    }
+
+    if (touchPanActive && touchPanMoved) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      touchPanActive = false;
+      return;
+    }
+    touchPanActive = false;
+
+    if (menu && menu.classList.contains('open')) {
+      const portalResults = document.getElementById('portalResults');
+      const menuInfoSection = document.getElementById('menuInfoSection');
+      const touchTarget = e.changedTouches && e.changedTouches[0] ? document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY) : null;
+      const isSwipingInsideModal = (portalResults && touchTarget && portalResults.contains(touchTarget)) || (menuInfoSection && touchTarget && menuInfoSection.contains(touchTarget));
+      
+      if (isSwipingInsideModal) {
+        touchPanActive = false;
+        return;
+      }
+      
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      if (dx < 0) {
+        closePortalMenu(false);
+        if (window.isInfoEnabled !== false) {
+          openInfoAt(getLastTabId(), true);
+        }
+      } else {
+        closePortalMenu(true);
+      }
+      lockTransitions();
+      return;
+    }
+
+    if (document.body.classList.contains('info-open')) {
+      if (dx > 0) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        closeInfoToVideo(false);
+        lockTransitions();
+      }
+      return;
+    }
+
+    if (dx > 0) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      return;
+    }
+
+    if (dx < 0) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      if (window.isInfoEnabled !== false) openInfoAt(getFirstTabId(), true);
+      else openPortalMenu(false);
+      lockTransitions();
+    }
+  }, { passive:false, capture:true });
+
+  window.addEventListener('pointermove', function(e){
+    if (!e.isPrimary || e.pointerType !== 'mouse' || !isVideoActive() || document.body.classList.contains('info-open')) {
+      return;
+    }
+    const nx = e.clientX / window.innerWidth - 0.5;
+    const ny = e.clientY / window.innerHeight - 0.5;
+    const limits = getPanLimits();
+    setVideoPan(nx * limits.x * 2, ny * limits.y * 2);
+  }, { passive:true });
+
+  window.addEventListener('mouseleave', function(){
+    if (!window.matchMedia('(hover: hover)').matches) {
+      return;
+    }
+    resetVideoPan();
+  });
+
+  window.addEventListener('blur', function(){
+    resetVideoPan();
+  });
+
+  let resizeTimeout = null;
+  window.addEventListener('resize', function(){
+    if (resizeTimeout) clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(function(){
+      resizeTimeout = null;
+      updateVideoStageSize();
+      setVideoPan(currentPanX, currentPanY);
+    }, 100);
+  });
+
+  document.getElementById('portalBtn')?.addEventListener('click', function(){
+    resetWheelIntent();
+  }, true);
+
+  function attemptVideoLoad(videoId) {
+    var cfg = window.VIDEO_CONFIG && window.VIDEO_CONFIG[videoId];
+    if (!cfg) return;
+    var isPublic = videoId === 'langebaan-nessie' || !cfg.private;
+    var isUnlocked = window._currentUnlockedVideoId === videoId;
+    if (!isPublic && !isUnlocked) {
+      showPasswordPrompt(videoId);
+      return;
+    }
+    selectAndPlayVideo(videoId);
+  }
+  window.attemptVideoLoad = attemptVideoLoad;
+
+  function showPasswordPrompt(videoId) {
+    var existing = document.getElementById('pwPromptShade');
+    if (existing) existing.remove();
+    var cfg = window.VIDEO_CONFIG[videoId];
+    var requiredPassword = (cfg && cfg.password) || '0000';
+    var shade = document.createElement('div');
+    shade.id = 'pwPromptShade';
+    shade.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.32);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:center;justify-content:center;';
+    var box = document.createElement('div');
+    box.className = 'glass';
+    box.style.cssText = 'width:min(92vw,340px);padding:24px;border-radius:20px;text-align:center;z-index:201;';
+    box.innerHTML = '<h2 style="margin:0 0 8px;font-size:1.1rem;">Private Video</h2>'
+      + '<p style="margin:0 0 18px;color:var(--muted);line-height:1.5;">This is a private video. Please enter password.</p>'
+      + '<input id="pwPromptInput" type="password" placeholder="Password" autocomplete="off" style="width:100%;height:40px;padding:0 12px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--fg);font-size:.95rem;margin-bottom:8px;text-align:center;">'
+      + '<p id="pwPromptError" style="margin:0 0 10px;font-size:.85rem;color:#e74c3c;min-height:1.2em;"></p>'
+      + '<div style="display:flex;justify-content:center;gap:10px;">'
+      + '<button id="pwPromptSubmit" class="btn primary" type="button">Submit</button>'
+      + '<button id="pwPromptCancel" class="btn" type="button">Cancel</button>'
+      + '</div>';
+    shade.appendChild(box);
+    document.body.appendChild(shade);
+    var input = document.getElementById('pwPromptInput');
+    var error = document.getElementById('pwPromptError');
+    function closePwPrompt() { shade.remove(); }
+    function submitPw() {
+      var val = input ? input.value : '';
+      if (val === requiredPassword) {
+        window._currentUnlockedVideoId = videoId;
+        window._unlockedPrivateVideos[videoId] = true;
+        closePwPrompt();
+        selectAndPlayVideo(videoId);
+      } else {
+        if (error) error.textContent = 'Incorrect password. Please try again.';
+        if (input) { input.value = ''; input.focus(); }
+      }
+    }
+    document.getElementById('pwPromptSubmit').addEventListener('click', submitPw);
+    document.getElementById('pwPromptCancel').addEventListener('click', closePwPrompt);
+    shade.addEventListener('click', function(ev) { if (ev.target === shade) closePwPrompt(); });
+    if (input) {
+      input.addEventListener('keydown', function(ev) {
+        if (ev.key === 'Enter') { ev.preventDefault(); submitPw(); }
+        if (ev.key === 'Escape') { ev.preventDefault(); closePwPrompt(); }
+      });
+      requestAnimationFrame(function() { input.focus(); });
+    }
+  }
+
+  document.getElementById('portalResults')?.addEventListener('click', function(e){
+    var result = e.target && e.target.closest ? e.target.closest('.result[data-video-id]') : null;
+    if (!result) return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    attemptVideoLoad(result.getAttribute('data-video-id'));
+  }, true);
+
+  // Enter key handling moved to global keydown handler when menu is open
+  // This ensures consistent behavior regardless of focus state
+
+  document.getElementById('portalSearch')?.addEventListener('input', function(e){
+    window._portalFilterResults(e.target.value);
+    if (typeof resetMenuSelection === 'function') resetMenuSelection();
+  });
+
+  document.getElementById('startBar')?.addEventListener('click', function(){
+    markExperienceStarted();
+    resetWheelIntent();
+    setTimeout(ensureVideoPlayback, 60);
+  }, true);
+
+  document.getElementById('videoToggle')?.addEventListener('change', function(e){
+    if (e.target.checked) {
+      markExperienceStarted();
+    }
+  }, true);
+
+  const video = document.getElementById('player');
+  video?.addEventListener('loadedmetadata', function(){
+    updateVideoStageSize();
+    setVideoPan(currentPanX, currentPanY);
+  }, true);
+  video?.addEventListener('loadeddata', function(){
+    updateVideoStageSize();
+    setVideoPan(currentPanX, currentPanY);
+  }, true);
+  video?.addEventListener('play', function(){
+    markExperienceStarted();
+  }, true);
+
+  const landing = getLanding();
+  const videoWrap = document.getElementById('video');
+  if (landing && videoWrap && 'MutationObserver' in window) {
+    const observer = new MutationObserver(function(){
+      enforceVideoHub();
+    });
+    observer.observe(landing, { attributes:true, attributeFilter:['style', 'class'] });
+    observer.observe(videoWrap, { attributes:true, attributeFilter:['style', 'class'] });
+  }
+  window.syncInfoButtonForVideo = syncInfoButtonForVideo;
+  updateVideoStageSize();
+
+  // Constellation Line Effect - connects points across key presses
+  (function initConstellationEffect() {
+    var canvas = document.getElementById('constellationCanvas');
+    var videoEl = document.getElementById('player');
+    var videoWrapEl = document.getElementById('video');
+    var menuEl = document.getElementById('menu');
+    var panelEl = document.getElementById('panel');
+    var modalEl = document.getElementById('modal');
+    
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // State
+    var lastPoint = null;
+    var lines = []; // Store active lines for fade-out
+    var animationFrame = null;
+
+    // Valid keys for triggering effect
+    var validKeys = [
+      'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+      'a','b','c','d','e','f','g','h','i','j','k','l','m',
+      'n','o','p','q','r','s','t','u','v','w','x','y','z',
+      'A','B','C','D','E','F','G','H','I','J','K','L','M',
+      'N','O','P','Q','R','S','T','U','V','W','X','Y','Z'
+    ];
+
+    function resizeCanvas() {
+      var rect = canvas.parentElement.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+    }
+
+    function isEditableTarget(el) {
+      if (!el) return false;
+      var tag = el.tagName ? el.tagName.toLowerCase() : '';
+      return tag === 'input' || tag === 'textarea' || tag === 'select' || el.isContentEditable;
+    }
+
+    function isModalActive() {
+      return (menuEl && menuEl.classList.contains('open')) ||
+             (panelEl && panelEl.classList.contains('open')) ||
+             (modalEl && modalEl.classList.contains('open'));
+    }
+
+    function isVideoPlaying() {
+      return videoWrapEl && videoWrapEl.style.display === 'block' && videoEl && !videoEl.paused;
+    }
+
+    function generatePoint() {
+      var padding = 60;
+      return {
+        x: padding + Math.random() * (canvas.width - padding * 2),
+        y: padding + Math.random() * (canvas.height - padding * 2)
+      };
+    }
+
+    function addLine(from, to) {
+      lines.push({
+        from: from,
+        to: to,
+        progress: 0,
+        opacity: 0.6,
+        createdAt: Date.now()
+      });
+      if (!animationFrame) {
+        animationFrame = requestAnimationFrame(render);
+      }
+    }
+
+    function render() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      var now = Date.now();
+      var activeLines = [];
+
+      for (var i = 0; i < lines.length; i++) {
+        var line = lines[i];
+        var age = now - line.createdAt;
+        
+        // Animate line drawing (first 300ms)
+        if (line.progress < 1) {
+          line.progress = Math.min(1, age / 300);
+        }
+        
+        // Fade out after 2 seconds
+        if (age > 2000) {
+          line.opacity = Math.max(0, 0.6 - (age - 2000) / 1500);
+        }
+        
+        // Keep line if still visible
+        if (line.opacity > 0.01) {
+          activeLines.push(line);
+          drawLine(line);
+        }
+      }
+
+      lines = activeLines;
+
+      if (lines.length > 0) {
+        animationFrame = requestAnimationFrame(render);
+      } else {
+        animationFrame = null;
+      }
+    }
+
+    function isDarkMode() {
+      return document.body.classList.contains('dark');
+    }
+
+    function drawLine(line) {
+      var endX = line.from.x + (line.to.x - line.from.x) * line.progress;
+      var endY = line.from.y + (line.to.y - line.from.y) * line.progress;
+
+      // Theme-adaptive colors: white in dark mode, black in light mode
+      var isDark = isDarkMode();
+      var glowColor = isDark ? 'rgba(255, 255, 255, ' : 'rgba(0, 0, 0, ';
+      var lineColor = isDark ? 'rgba(255, 255, 255, ' : 'rgba(0, 0, 0, ';
+
+      ctx.beginPath();
+      ctx.moveTo(line.from.x, line.from.y);
+      ctx.lineTo(endX, endY);
+      
+      // Soft glow effect (outer)
+      ctx.strokeStyle = glowColor + (line.opacity * 0.3) + ')';
+      ctx.lineWidth = 3;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+
+      // Inner line
+      ctx.strokeStyle = lineColor + (line.opacity * 0.6) + ')';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // Draw small node at current end point
+      if (line.progress >= 1) {
+        ctx.beginPath();
+        ctx.arc(line.to.x, line.to.y, 2, 0, Math.PI * 2);
+        ctx.fillStyle = lineColor + line.opacity + ')';
+        ctx.fill();
+      }
+    }
+
+    function triggerLine() {
+      var newPoint = generatePoint();
+      
+      if (lastPoint) {
+        addLine(lastPoint, newPoint);
+      } else {
+        // First point - draw a small dot
+        lines.push({
+          from: newPoint,
+          to: newPoint,
+          progress: 1,
+          opacity: 0.6,
+          createdAt: Date.now()
+        });
+        if (!animationFrame) {
+          animationFrame = requestAnimationFrame(render);
+        }
+      }
+      
+      lastPoint = newPoint;
+    }
+
+    // Resize canvas on window resize
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    window.addEventListener('keydown', function(e) {
+      // Guard: skip if typing in input
+      if (isEditableTarget(e.target)) return;
+      
+      // Guard: skip if modal is active
+      if (isModalActive()) return;
+      
+      // Guard: only trigger when video is playing
+      if (!isVideoPlaying()) return;
+      
+      // Guard: only valid keys
+      if (validKeys.indexOf(e.key) === -1) return;
+      
+      // Ensure canvas is sized
+      if (canvas.width === 0 || canvas.height === 0) resizeCanvas();
+      
+      // Trigger the line effect
+      triggerLine();
+    });
+
+    // Reset last point when video changes or modal opens
+    function resetConstellation() {
+      lastPoint = null;
+    }
+    window.resetConstellationEffect = resetConstellation;
+  })();
+})();
+</script>
+</body>
+</html>
+
+
+
